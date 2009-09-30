@@ -19,45 +19,39 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.simple;
 
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import javax.naming.Context;
+
+import org.jboss.reloaded.naming.spi.JavaEEApplication;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
+ * A simple implementation of {@link JavaEEApplication}.
  * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class SimpleJavaEEApplication implements JavaEEApplication
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
-   
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   private Context context;
+   private String name;
+
+   public SimpleJavaEEApplication(String name, Context context)
    {
-      return stack.get();
+      assert name != null : "name is null";
+      assert context != null : "context is null";
+      
+      this.name = name;
+      this.context = context;
    }
    
-   public static JavaEEComponent pop()
+   public Context getContext()
    {
-      JavaEEComponent comp = stack.pop();
-      
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
-      
-      return comp;
+      return context;
    }
-   
-   public static void push(JavaEEComponent component)
+
+   public String getName()
    {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      return name;
    }
 }

@@ -19,45 +19,54 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.simple;
 
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import javax.naming.Context;
+
+import org.jboss.reloaded.naming.spi.JavaEEApplication;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
+ * A simple implementation of {@link JavaEEModule}.
  * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class SimpleJavaEEModule implements JavaEEModule
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
-   
+   private JavaEEApplication application;
+   private Context context;
+   private String name;
+
    /**
-    * @return the current JavaEEComponent
+    * Instantiate a {@link SimpleJavaEEModule}.
+    * 
+    * @param name the name of the module
+    * @param context the naming context of the module
+    * @param application the application of which this module is part, or null if stand alone
     */
-   public static JavaEEComponent get()
+   public SimpleJavaEEModule(String name, Context context, JavaEEApplication application)
    {
-      return stack.get();
+      assert name != null : "name is null";
+      assert context != null : "context is null";
+      
+      this.name = name;
+      this.context = context;
+      this.application = application;
    }
    
-   public static JavaEEComponent pop()
+   public JavaEEApplication getApplication()
    {
-      JavaEEComponent comp = stack.pop();
-      
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
-      
-      return comp;
+      return application;
    }
-   
-   public static void push(JavaEEComponent component)
+
+   public Context getContext()
    {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      return context;
+   }
+
+   public String getName()
+   {
+      return name;
    }
 }

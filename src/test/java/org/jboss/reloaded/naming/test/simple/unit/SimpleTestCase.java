@@ -19,45 +19,42 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.test.simple.unit;
 
-import org.jboss.naming.ENCFactory;
+import static junit.framework.Assert.assertEquals;
+
+import org.jboss.reloaded.naming.CurrentComponent;
+import org.jboss.reloaded.naming.simple.SimpleJavaEEComponent;
+import org.jboss.reloaded.naming.simple.SimpleJavaEEModule;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
+import org.jboss.reloaded.naming.test.common.AbstractNamingTestCase;
+import org.jboss.util.naming.Util;
+import org.junit.Test;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class SimpleTestCase extends AbstractNamingTestCase
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
-   
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   @Test
+   public void test1() throws Exception
    {
-      return stack.get();
-   }
-   
-   public static JavaEEComponent pop()
-   {
-      JavaEEComponent comp = stack.pop();
+      JavaEEModule module = new SimpleJavaEEModule("module", createContext(iniCtx.getEnvironment()), null);
+      JavaEEComponent component = new SimpleJavaEEComponent("component", createContext(iniCtx.getEnvironment()), module);
       
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
+      Util.rebind(component.getContext(), "env/value", "Hello world");
       
-      return comp;
-   }
-   
-   public static void push(JavaEEComponent component)
-   {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      CurrentComponent.push(component);
+      try
+      {
+         String value = (String) iniCtx.lookup("java:comp/env/value");
+         assertEquals("Hello world", value);
+      }
+      finally
+      {
+         CurrentComponent.pop();
+      }
    }
 }

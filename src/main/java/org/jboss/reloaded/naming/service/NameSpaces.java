@@ -19,45 +19,40 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.service;
 
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class NameSpaces
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
+   private InitialContext iniCtx;
    
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   public void start() throws NamingException
    {
-      return stack.get();
+      iniCtx = new InitialContext();
+      RefAddr refAddr = new StringRefAddr("nns", "ENC");
+      Reference envRef = new Reference("javax.naming.Context", refAddr, ComponentObjectFactory.class.getName(), null);
+      Context ctx = (Context) iniCtx.lookup("java:");
+      ctx.rebind("comp", envRef);
    }
    
-   public static JavaEEComponent pop()
+   public void stop() throws NamingException
    {
-      JavaEEComponent comp = stack.pop();
+      if(iniCtx == null)
+         return;
       
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
+      Context ctx = (Context) iniCtx.lookup("java:");
+      ctx.unbind("comp");
       
-      return comp;
-   }
-   
-   public static void push(JavaEEComponent component)
-   {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      iniCtx.close();
    }
 }

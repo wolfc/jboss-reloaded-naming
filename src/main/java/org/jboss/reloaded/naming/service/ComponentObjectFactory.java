@@ -19,45 +19,45 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.service;
+
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
 
 import org.jboss.naming.ENCFactory;
+import org.jboss.reloaded.naming.CurrentComponent;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class ComponentObjectFactory implements ObjectFactory
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
+   private ENCFactory legacy = new ENCFactory();
    
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable<?, ?> environment)
+      throws Exception
    {
-      return stack.get();
+      JavaEEComponent current = CurrentComponent.get();
+      Object currentLegacyId = ENCFactory.getCurrentId();
+      // if there is no current set or some legacy component has pushed another id
+      if(current == null || !currentLegacyId.equals(id(current)))
+      {
+         // do legacy resolution
+         return legacy.getObjectInstance(obj, name, nameCtx, environment);
+      }
+      else
+      {
+         return current.getContext();
+      }
    }
    
-   public static JavaEEComponent pop()
+   public static Object id(JavaEEComponent component)
    {
-      JavaEEComponent comp = stack.pop();
-      
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
-      
-      return comp;
-   }
-   
-   public static void push(JavaEEComponent component)
-   {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      return component.getName();
    }
 }

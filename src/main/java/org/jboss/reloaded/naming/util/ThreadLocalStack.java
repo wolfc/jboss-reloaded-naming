@@ -24,7 +24,7 @@ package org.jboss.reloaded.naming.util;
 import java.util.LinkedList;
 
 /**
- * Comment
+ * INTERNAL
  *
  * @author <a href="mailto:bill@jboss.org">Bill Burke</a>
  * @version $Revision$

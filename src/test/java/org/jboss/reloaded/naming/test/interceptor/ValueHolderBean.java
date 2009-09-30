@@ -19,45 +19,26 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.test.interceptor;
 
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class ValueHolderBean implements ValueHolder
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
-   
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   public String getValue()
    {
-      return stack.get();
-   }
-   
-   public static JavaEEComponent pop()
-   {
-      JavaEEComponent comp = stack.pop();
-      
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
-      
-      return comp;
-   }
-   
-   public static void push(JavaEEComponent component)
-   {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      try
+      {
+         return (String) new InitialContext().lookup("java:comp/env/value");
+      }
+      catch (NamingException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }

@@ -19,45 +19,54 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.test.interceptor;
 
-import org.jboss.naming.ENCFactory;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+import org.jboss.reloaded.naming.interceptor.AbstractNamingInterceptor;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public class NamingInvocationHandler extends AbstractNamingInterceptor<NamingInvocationHandler.InvocationContext> implements InvocationHandler
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
-   
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   public static class InvocationContext
    {
-      return stack.get();
+      Object target;
+      Method method;
+      Object parameters[];
    }
    
-   public static JavaEEComponent pop()
+   private JavaEEComponent component;
+   private Object target;
+   
+   public NamingInvocationHandler(JavaEEComponent component, Object target)
    {
-      JavaEEComponent comp = stack.pop();
-      
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
-      
-      return comp;
+      this.component = component;
+      this.target = target;
    }
    
-   public static void push(JavaEEComponent component)
+   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
    {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      InvocationContext context = new InvocationContext();
+      context.target = target;
+      context.method = method;
+      context.parameters = args;
+      return invoke(context);
+   }
+
+   @Override
+   protected JavaEEComponent getComponent()
+   {
+      return component;
+   }
+
+   @Override
+   protected Object proceed(NamingInvocationHandler.InvocationContext context) throws Throwable
+   {
+      return context.method.invoke(context.target, context.parameters);
    }
 }

@@ -19,45 +19,55 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming;
+package org.jboss.reloaded.naming.test.common;
 
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.util.ThreadLocalStack;
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+import org.jboss.reloaded.naming.service.NameSpaces;
+import org.jnp.interfaces.NamingContext;
+import org.jnp.server.NamingServer;
+import org.jnp.server.SingletonNamingServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 /**
- * Provides the bridge between the JNDI object factory and the namespaces.
- * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
-public class CurrentComponent
+public abstract class AbstractNamingTestCase
 {
-   private static ThreadLocalStack<JavaEEComponent> stack = new ThreadLocalStack<JavaEEComponent>();
+   private static SingletonNamingServer server;
+   private static NameSpaces ns;
+   protected static InitialContext iniCtx;
    
-   /**
-    * @return the current JavaEEComponent
-    */
-   public static JavaEEComponent get()
+   @AfterClass
+   public static void afterClass() throws NamingException
    {
-      return stack.get();
+      iniCtx.close();
+      
+      ns.stop();
+      
+      server.destroy();
    }
    
-   public static JavaEEComponent pop()
+   @BeforeClass
+   public static void beforeClass() throws NamingException
    {
-      JavaEEComponent comp = stack.pop();
+      server = new SingletonNamingServer();
       
-      // to enable legacy java:comp resolution we must also pop from ENCFactory
-      ENCFactory.popContextId();
+      ns = new NameSpaces();
+      ns.start();
       
-      return comp;
+      iniCtx = new InitialContext();
    }
    
-   public static void push(JavaEEComponent component)
+   protected Context createContext(Hashtable<?, ?> environment) throws NamingException
    {
-      // to enable legacy java:comp resolution we must also push to ENCFactory
-      ENCFactory.pushContextId(component.getName());
-      
-      stack.push(component);
+      NamingServer srv = new NamingServer();
+      return new NamingContext(environment, null, srv);
    }
 }
