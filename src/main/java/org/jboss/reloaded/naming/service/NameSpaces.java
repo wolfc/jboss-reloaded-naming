@@ -21,12 +21,8 @@
  */
 package org.jboss.reloaded.naming.service;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.naming.RefAddr;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
+import javax.naming.*;
+import javax.naming.spi.ObjectFactory;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
@@ -35,14 +31,22 @@ import javax.naming.StringRefAddr;
 public class NameSpaces
 {
    private InitialContext iniCtx;
-   
+
+   protected Reference createRef(String nns, Class<? extends ObjectFactory> objectFactory)
+   {
+      RefAddr refAddr = new StringRefAddr("nns", nns);
+      Reference ref = new Reference("javax.naming.Context", refAddr, objectFactory.getName(), null);
+      return ref;
+   }
+
    public void start() throws NamingException
    {
       iniCtx = new InitialContext();
-      RefAddr refAddr = new StringRefAddr("nns", "ENC");
-      Reference envRef = new Reference("javax.naming.Context", refAddr, ComponentObjectFactory.class.getName(), null);
-      Context ctx = (Context) iniCtx.lookup("java:");
-      ctx.rebind("comp", envRef);
+      Context javaContext = (Context) iniCtx.lookup("java:");
+      javaContext.rebind("comp", createRef("ENC", ComponentObjectFactory.class));
+      javaContext.rebind("module", createRef("MOD", ModuleObjectFactory.class));
+      javaContext.rebind("app", createRef("APP", AppObjectFactory.class));
+      javaContext.createSubcontext("global");
    }
    
    public void stop() throws NamingException
@@ -50,8 +54,11 @@ public class NameSpaces
       if(iniCtx == null)
          return;
       
-      Context ctx = (Context) iniCtx.lookup("java:");
-      ctx.unbind("comp");
+      Context javaContext = (Context) iniCtx.lookup("java:");
+      javaContext.unbind("global");
+      javaContext.unbind("app");
+      javaContext.unbind("module");
+      javaContext.unbind("comp");
       
       iniCtx.close();
    }

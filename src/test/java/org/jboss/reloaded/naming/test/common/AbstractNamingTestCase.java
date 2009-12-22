@@ -21,18 +21,17 @@
  */
 package org.jboss.reloaded.naming.test.common;
 
-import java.util.Hashtable;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.jboss.reloaded.naming.service.NameSpaces;
 import org.jnp.interfaces.NamingContext;
 import org.jnp.server.NamingServer;
 import org.jnp.server.SingletonNamingServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.util.Hashtable;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
@@ -43,6 +42,7 @@ public abstract class AbstractNamingTestCase
    private static SingletonNamingServer server;
    private static NameSpaces ns;
    protected static InitialContext iniCtx;
+   protected static Context javaGlobal;
    
    @AfterClass
    public static void afterClass() throws NamingException
@@ -63,9 +63,11 @@ public abstract class AbstractNamingTestCase
       ns.start();
       
       iniCtx = new InitialContext();
+
+      javaGlobal = (Context) iniCtx.lookup("java:global");
    }
    
-   protected Context createContext(Hashtable<?, ?> environment) throws NamingException
+   protected static Context createContext(Hashtable<?, ?> environment) throws NamingException
    {
       NamingServer srv = new NamingServer();
       return new NamingContext(environment, null, srv);

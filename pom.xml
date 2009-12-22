@@ -17,6 +17,17 @@
   <description>
   </description>
   
+  <build>
+    <plugins>
+      <plugin>
+        <!-- else you might get the snapshot, which doesn't pick up the correct classes directory -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <!--
     <dependency>
@@ -29,7 +40,7 @@
     <dependency>
       <groupId>org.jboss.naming</groupId>
       <artifactId>jnpserver</artifactId>
-      <version>5.0.3.GA</version>
+      <version>5.0.4.GA</version>
     </dependency>
   </dependencies>
 </project>
