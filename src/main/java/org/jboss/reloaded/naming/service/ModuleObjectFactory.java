@@ -27,6 +27,7 @@ import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
 import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
 import java.util.Hashtable;
 
@@ -43,7 +44,7 @@ public class ModuleObjectFactory implements ObjectFactory
       if(current == null || !currentLegacyId.equals(ComponentObjectFactory.id(current)))
       {
          // do legacy resolution
-         return null;
+         throw new NamingException("java:module not supported by legacy component " + currentLegacyId);
       }
       else
       {

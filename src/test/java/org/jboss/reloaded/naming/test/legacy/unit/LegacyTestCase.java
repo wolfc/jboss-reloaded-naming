@@ -21,13 +21,7 @@
  */
 package org.jboss.reloaded.naming.test.legacy.unit;
 
-import static junit.framework.Assert.assertEquals;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import junit.framework.Assert;
-
 import org.jboss.naming.ENCFactory;
 import org.jboss.reloaded.naming.CurrentComponent;
 import org.jboss.reloaded.naming.simple.SimpleJavaEEComponent;
@@ -37,6 +31,12 @@ import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.jboss.reloaded.naming.test.common.AbstractNamingTestCase;
 import org.jboss.util.naming.Util;
 import org.junit.Test;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
@@ -70,7 +70,45 @@ public class LegacyTestCase extends AbstractNamingTestCase
          ENCFactory.popContextId();
       }
    }
-   
+
+   @Test
+   public void testLegacyCallingApp() throws NamingException
+   {
+      ENCFactory.pushContextId("legacy");
+      try
+      {
+         iniCtx.lookup("java:app/env/value");
+         fail("Expected NamingException");
+      }
+      catch(NamingException e)
+      {
+         // good
+      }
+      finally
+      {
+         ENCFactory.popContextId();
+      }
+   }
+
+   @Test
+   public void testLegacyCallingModule() throws NamingException
+   {
+      ENCFactory.pushContextId("legacy");
+      try
+      {
+         iniCtx.lookup("java:module/env/value");
+         fail("Expected NamingException");
+      }
+      catch(NamingException e)
+      {
+         // good
+      }
+      finally
+      {
+         ENCFactory.popContextId();
+      }
+   }
+
    @Test
    public void testLegacyCallingNew() throws NamingException
    {

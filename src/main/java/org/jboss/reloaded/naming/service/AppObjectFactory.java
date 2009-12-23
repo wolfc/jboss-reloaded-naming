@@ -28,10 +28,15 @@ import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
 import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
 import java.util.Hashtable;
 
 /**
+ * The AppObjectFactory is responsible for resolving java:app.
+ * Normally it's installed via the NameSpaces class.
+ *
+ * @see org.jboss.reloaded.naming.service.NameSpaces
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
 public class AppObjectFactory implements ObjectFactory
@@ -44,13 +49,13 @@ public class AppObjectFactory implements ObjectFactory
       if(current == null || !currentLegacyId.equals(ComponentObjectFactory.id(current)))
       {
          // do legacy resolution
-         return null;
+         throw new NamingException("java:app not supported by legacy component " + currentLegacyId);
       }
       else
       {
          JavaEEApplication application = current.getModule().getApplication();
          if(application == null)
-            return null;
+            throw new NamingException("module " + current.getModule().getName() + " is not part of an application");
          return application.getContext();
       }
    }
