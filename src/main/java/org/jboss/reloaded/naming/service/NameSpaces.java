@@ -25,18 +25,36 @@ import javax.naming.*;
 import javax.naming.spi.ObjectFactory;
 
 /**
+ * NameSpaces sets up the facilities which provide the four JavaEE standardized name spaces.
+ *
+ * EE.5.2.2 Application Component Environment Namespaces
+ * 
+ * Note that this class doesn't check the life-cycle state by itself, so starting NameSpaces multiple
+ * times will lead to interesting results.
+ *
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
 public class NameSpaces
 {
    private InitialContext iniCtx;
+   private Context globalContext;
 
    protected Reference createRef(String nns, Class<? extends ObjectFactory> objectFactory)
    {
       RefAddr refAddr = new StringRefAddr("nns", nns);
       Reference ref = new Reference("javax.naming.Context", refAddr, objectFactory.getName(), null);
       return ref;
+   }
+
+   /**
+    * A convenience method to get java:global.
+    *
+    * @return the context java:global
+    */
+   public Context getGlobalContext()
+   {
+      return globalContext;
    }
 
    public void start() throws NamingException
@@ -46,7 +64,7 @@ public class NameSpaces
       javaContext.rebind("comp", createRef("ENC", ComponentObjectFactory.class));
       javaContext.rebind("module", createRef("MOD", ModuleObjectFactory.class));
       javaContext.rebind("app", createRef("APP", AppObjectFactory.class));
-      javaContext.createSubcontext("global");
+      globalContext = javaContext.createSubcontext("global");
    }
    
    public void stop() throws NamingException
@@ -56,6 +74,7 @@ public class NameSpaces
       
       Context javaContext = (Context) iniCtx.lookup("java:");
       javaContext.unbind("global");
+      globalContext = null;
       javaContext.unbind("app");
       javaContext.unbind("module");
       javaContext.unbind("comp");
