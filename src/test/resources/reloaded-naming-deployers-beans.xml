@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
-   <bean name="AppNamingDeployer" class="org.jboss.reloaded.naming.deployers.AppNamingDeployer"/>
-   <bean name="ModuleNamingDeployer" class="org.jboss.reloaded.naming.deployers.ModuleNamingDeployer"/>
+   <bean name="JavaEEApplicationInformer" class="org.jboss.reloaded.naming.deployers.test.common.DummyJavaEEApplicationInformer"/>
+   <bean name="JavaEEModuleInformer" class="org.jboss.reloaded.naming.deployers.test.common.DummyJavaEEModuleInformer"/>
+   <bean name="JavaEEComponentInformer" class="org.jboss.reloaded.naming.deployers.test.common.DummyJavaEEComponentInformer"/>
+
+   <bean name="AppNamingDeployer" class="org.jboss.reloaded.naming.deployers.AppNamingDeployer">
+      <constructor><parameter><inject bean="JavaEEApplicationInformer"/></parameter></constructor>
+   </bean>
+   <bean name="ModuleNamingDeployer" class="org.jboss.reloaded.naming.deployers.ModuleNamingDeployer">
+      <constructor><parameter><inject bean="JavaEEModuleInformer"/></parameter></constructor>
+   </bean>
+   <bean name="ComponentNamingDeployer" class="org.jboss.reloaded.naming.deployers.ComponentNamingDeployer">
+      <constructor><parameter><inject bean="JavaEEComponentInformer"/></parameter></constructor>
+   </bean>
 </deployment>

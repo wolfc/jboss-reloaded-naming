@@ -26,6 +26,9 @@ import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.dependency.spi.ControllerMode;
 import org.jboss.dependency.spi.ControllerState;
 import org.jboss.deployers.client.spi.main.MainDeployer;
+import org.jboss.deployers.spi.attachments.MutableAttachments;
+import org.jboss.deployers.spi.structure.StructureMetaData;
+import org.jboss.deployers.spi.structure.StructureMetaDataFactory;
 import org.jboss.deployers.vfs.plugins.client.AbstractVFSDeployment;
 import org.jboss.deployers.vfs.spi.client.VFSDeployment;
 import org.jboss.kernel.Kernel;
@@ -33,15 +36,21 @@ import org.jboss.kernel.plugins.bootstrap.AbstractBootstrap;
 import org.jboss.kernel.plugins.bootstrap.basic.BasicBootstrap;
 import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
+import org.jboss.metadata.ear.jboss.JBossAppMetaData;
+import org.jboss.reloaded.naming.deployers.test.common.DummiesMetaData;
 import org.jboss.reloaded.naming.service.NameSpaces;
 import org.jboss.virtual.AssembledDirectory;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 import java.net.URL;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
@@ -50,14 +59,41 @@ public class SimpleTestCase
 {
    private static Kernel kernel;
    private static BasicXMLDeployer deployer;
+   private static MainDeployer mainDeployer;
+   private static InitialContext ctx;
+
+   protected static final void assertNameNotFound(String name) throws NamingException
+   {
+      try
+      {
+         ctx.lookup(name);
+         fail("Expected NameNotFoundException for " + name);
+      }
+      catch(NameNotFoundException e)
+      {
+         // good
+      }
+   }
 
    @BeforeClass
-   public static void beforeClass()
+   public static void beforeClass() throws Exception
    {
       AbstractBootstrap bootstrap = new BasicBootstrap();
       bootstrap.run();
       kernel = bootstrap.getKernel();
       deployer = new BasicXMLDeployer(kernel, ControllerMode.AUTOMATIC);
+
+      deploy(SimpleTestCase.class.getClassLoader(), "classloader.xml");
+      deploy(SimpleTestCase.class.getClassLoader(), "deployers.xml");
+
+      mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
+
+      deploy(SimpleTestCase.class.getClassLoader(), "jndi-beans.xml");
+      deploy(SimpleTestCase.class.getClassLoader(), "reloaded-naming-deployers-beans.xml");
+
+      deploy(SimpleTestCase.class.getClassLoader(), "dummy-deployers-beans.xml");
+
+      ctx = new InitialContext();
    }
 
    protected static <T> T getBean(String name, ControllerState state, Class<T> expectedType)
@@ -100,33 +136,88 @@ public class SimpleTestCase
    @Test
    public void test1() throws Exception
    {
-      deploy(getClass().getClassLoader(), "classloader.xml");
-      deploy(getClass().getClassLoader(), "deployers.xml");
+      AssembledDirectory root1 = AssembledDirectory.createAssembledDirectory("test1", "test1.ear");
+      VFSDeployment deployment1 = new AbstractVFSDeployment(root1);
+      ((MutableAttachments) deployment1.getPredeterminedManagedObjects()).addAttachment(JBossAppMetaData.class, new JBossAppMetaData());
+      mainDeployer.deploy(deployment1);
 
-      MainDeployer mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
-
-      deploy(getClass().getClassLoader(), "jndi-beans.xml");
-      deploy(getClass().getClassLoader(), "reloaded-naming-deployers-beans.xml");
-
-      {
-         AssembledDirectory root = AssembledDirectory.createAssembledDirectory("test1", "test1.ear");
-         VFSDeployment deployment = new AbstractVFSDeployment(root);
-         mainDeployer.deploy(deployment);
-      }
-      {
-         AssembledDirectory root = AssembledDirectory.createAssembledDirectory("test2", "test2.ear");
-         AssembledDirectory moduleA = root.mkdir("moduleA.jar");
-         VFSDeployment deployment = new AbstractVFSDeployment(root);
-         mainDeployer.deploy(deployment);
-      }
+      AssembledDirectory root2 = AssembledDirectory.createAssembledDirectory("test2", "test2.ear");
+      AssembledDirectory moduleA = root2.mkdir("moduleA.jar");
+      VFSDeployment deployment2 = new AbstractVFSDeployment(root2);
+      ((MutableAttachments) deployment2.getPredeterminedManagedObjects()).addAttachment(JBossAppMetaData.class, new JBossAppMetaData());
+      mainDeployer.deploy(deployment2);
 
       InitialContext ctx = new InitialContext();
       NameSpaces nameSpaces = getBean("NameSpaces", ControllerState.INSTALLED, NameSpaces.class);
-      System.out.println(nameSpaces.getGlobalContext());
-      System.out.println(ctx.lookup("java:global"));
-      System.out.println(ctx.lookup("java:global/test1"));
-      System.out.println(ctx.lookup("java:global/test2"));
-      System.out.println(ctx.lookup("java:global/test2/moduleA"));
+      assertNotNull(nameSpaces.getGlobalContext());
+      // basically the lookup is what really checks the functionality, not null is a bonus
+      assertNotNull(ctx.lookup("java:global"));
+      assertNotNull(ctx.lookup("java:global/test1"));
+      assertNotNull(ctx.lookup("java:global/test2"));
+      assertNotNull(ctx.lookup("java:global/test2/moduleA"));
+
+      mainDeployer.undeploy(deployment1);
+      mainDeployer.undeploy(deployment2);
+
+      assertNameNotFound("java:global/test1");
+      assertNameNotFound("java:global/test2");
+   }
+
+   @Test
+   @Ignore
+   public void testComponents() throws Exception
+   {
+      AssembledDirectory root = AssembledDirectory.createAssembledDirectory("components", "components.jar");
+      VFSDeployment deployment = new AbstractVFSDeployment(root);
+      ((MutableAttachments) deployment.getPredeterminedManagedObjects()).addAttachment(DummiesMetaData.class, DummiesMetaData.create("A", "B"));
+      mainDeployer.deploy(deployment);
+
+      // basically the lookup is what really checks the functionality, not null is a bonus
+      assertNotNull(ctx.lookup("java:global"));
+      assertNotNull(ctx.lookup("java:global/components"));
+
+      mainDeployer.undeploy(deployment);
+
+      assertNameNotFound("java:global/components");
+   }
+
+   @Test
+   public void testPath() throws Exception
+   {
+      AssembledDirectory root = AssembledDirectory.createAssembledDirectory("testPath", "testPath.ear");
+      AssembledDirectory path = root.mkdir("path");
+      AssembledDirectory moduleA = path.mkdir("modulePath.jar");
+      VFSDeployment deployment = new AbstractVFSDeployment(root);
+      // so we don't need an EAR structure deployer
+      StructureMetaData smd = StructureMetaDataFactory.createStructureMetaData();
+      smd.addContext(StructureMetaDataFactory.createContextInfo("path/modulePath.jar"));
+      ((MutableAttachments) deployment.getPredeterminedManagedObjects()).addAttachment(StructureMetaData.class, smd);
+      ((MutableAttachments) deployment.getPredeterminedManagedObjects()).addAttachment(JBossAppMetaData.class, new JBossAppMetaData());
+      mainDeployer.deploy(deployment);
+
+      // basically the lookup is what really checks the functionality, not null is a bonus
+      assertNotNull(ctx.lookup("java:global"));
+      assertNotNull(ctx.lookup("java:global/testPath/path/modulePath"));
+
+      mainDeployer.undeploy(deployment);
+
+      assertNameNotFound("java:global/testPath/path/modulePath");
+   }
+
+   @Test
+   public void testStandaloneModule() throws Exception
+   {
+      AssembledDirectory root = AssembledDirectory.createAssembledDirectory("standalone", "standalone.jar");
+      VFSDeployment deployment = new AbstractVFSDeployment(root);
+      mainDeployer.deploy(deployment);
+
+      // basically the lookup is what really checks the functionality, not null is a bonus
+      assertNotNull(ctx.lookup("java:global"));
+      assertNotNull(ctx.lookup("java:global/standalone"));
+
+      mainDeployer.undeploy(deployment);
+
+      assertNameNotFound("java:global/standalone");
    }
 
    protected static void validate() throws Exception

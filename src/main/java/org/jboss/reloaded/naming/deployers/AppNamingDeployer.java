@@ -27,20 +27,32 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.metadata.ear.spec.EarMetaData;
 import org.jboss.metadata.plugins.scope.ApplicationScope;
+import org.jboss.reloaded.naming.deployers.javaee.JavaEEApplicationInformer;
 import org.jboss.reloaded.naming.deployers.mc.MCJavaEEApplication;
 
 import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
+ * The AppNamingDeployer installs a JavaEEApplication MC bean under the name of java:app
+ * within an application scope with the JavaEE application name.
+ *
+ * The JavaEEApplication MC bean will take care of initiating the java:app name space.
+ *
+ * To work properly it needs a JavaEEApplicationInformer.
+ * 
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
 public class AppNamingDeployer extends AbstractRealDeployer
 {
-   public AppNamingDeployer()
+   private JavaEEApplicationInformer informer;
+
+   public AppNamingDeployer(JavaEEApplicationInformer informer)
    {
-      setInputs(EarMetaData.class);
+      if(informer == null)
+         throw new NullPointerException("informer is null");
+      this.informer = informer;
+      setInputs(informer.getRequiredAttachments());
       setOutputs("java:app");
       setOutput(BeanMetaData.class);
    }
@@ -51,7 +63,7 @@ public class AppNamingDeployer extends AbstractRealDeployer
       if(!isJavaEEApplication(deploymentUnit))
          return;
 
-      String appName = getAppName(deploymentUnit);
+      String appName = informer.getApplicationName(deploymentUnit);
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder("java:app", MCJavaEEApplication.class.getName())
          .addAnnotation(annotation(ApplicationScope.class, appName))
          .addConstructorParameter(String.class.getName(), appName);
@@ -61,14 +73,6 @@ public class AppNamingDeployer extends AbstractRealDeployer
 
    protected boolean isJavaEEApplication(DeploymentUnit deploymentUnit)
    {
-      return deploymentUnit.getSimpleName().endsWith(".ear") || deploymentUnit.getAttachment(EarMetaData.class) != null;
-   }
-
-   protected String getAppName(DeploymentUnit deploymentUnit)
-   {
-      String name = deploymentUnit.getSimpleName();
-      if(name.endsWith(".ear"))
-         return name.substring(0, name.length() - 4);
-      return name;
+      return informer.isJavaEEApplication(deploymentUnit);
    }
 }

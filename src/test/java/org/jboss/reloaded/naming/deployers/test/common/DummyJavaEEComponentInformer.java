@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,36 +19,31 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers.mc;
+package org.jboss.reloaded.naming.deployers.test.common;
 
-import org.jboss.logging.Logger;
-import org.jboss.reloaded.naming.spi.JavaEEApplication;
-
-import javax.naming.NamingException;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEApplication
+public class DummyJavaEEComponentInformer extends DummyJavaEEModuleInformer implements JavaEEComponentInformer
 {
-   private static final Logger log = Logger.getLogger(MCJavaEEApplication.class);
+   private static final String[] REQUIRED_ATTACHMENTS = { DummyMetaData.class.getName() };
    
-   public MCJavaEEApplication(String name)
+   public String getComponentName(DeploymentUnit unit)
    {
-      super(name);
+      return unit.getAttachment(DummyMetaData.class).getName();
    }
 
    @Override
-   public void start() throws NamingException
+   public String[] getRequiredAttachments()
    {
-      context = nameSpaces.getGlobalContext().createSubcontext(name);
-      log.debug("Installed context " + context + " for JavaEE application " + name);
+      return REQUIRED_ATTACHMENTS;
    }
 
-   @Override
-   public void stop() throws NamingException
+   public boolean isJavaEEComponent(DeploymentUnit unit)
    {
-      nameSpaces.getGlobalContext().unbind(name);
-      context = null;
+      return unit.isAttachmentPresent(DummyMetaData.class);
    }
 }

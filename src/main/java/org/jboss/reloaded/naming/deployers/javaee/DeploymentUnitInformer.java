@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,36 +19,21 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers.mc;
-
-import org.jboss.logging.Logger;
-import org.jboss.reloaded.naming.spi.JavaEEApplication;
-
-import javax.naming.NamingException;
+package org.jboss.reloaded.naming.deployers.javaee;
 
 /**
+ * Obtain information about a deployment unit.
+ * The informer should only use meta data to obtain the information
+ * being asked.
+ *
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEApplication
+interface DeploymentUnitInformer
 {
-   private static final Logger log = Logger.getLogger(MCJavaEEApplication.class);
-   
-   public MCJavaEEApplication(String name)
-   {
-      super(name);
-   }
-
-   @Override
-   public void start() throws NamingException
-   {
-      context = nameSpaces.getGlobalContext().createSubcontext(name);
-      log.debug("Installed context " + context + " for JavaEE application " + name);
-   }
-
-   @Override
-   public void stop() throws NamingException
-   {
-      nameSpaces.getGlobalContext().unbind(name);
-      context = null;
-   }
+   /**
+    * The required attachments for the informer to function.
+    *
+    * @return the names of the attachments
+    */
+   String[] getRequiredAttachments();
 }

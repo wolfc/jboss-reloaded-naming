@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,21 +19,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers.dependency;
-
-import org.jboss.dependency.spi.Controller;
-import org.jboss.dependency.spi.ControllerContext;
-import org.jboss.dependency.spi.ControllerState;
-import org.jboss.dependency.spi.graph.LookupStrategy;
+package org.jboss.reloaded.naming.deployers.test.common;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class ApplicationLookupStrategy implements LookupStrategy
+public class DummyMetaData
 {
+   private String name;
 
-   public ControllerContext getContext(Controller controller, Object name, ControllerState state)
+   public DummyMetaData(String s)
    {
-      return null;  //To change body of implemented methods use File | Settings | File Templates.
+      this.name = s;
+   }
+
+   public String getName()
+   {
+      return name;
    }
 }

@@ -22,6 +22,7 @@
 package org.jboss.reloaded.naming.deployers.mc;
 
 import org.jboss.logging.Logger;
+import org.jboss.util.naming.Util;
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
 
@@ -52,15 +53,14 @@ public class MCJavaEEModule extends AbstractNameSpace implements JavaEEModule
    public void start() throws Exception
    {
       parentContext = (application != null ? application.getContext() : nameSpaces.getGlobalContext());
-      log.info("name = " + name + ", parentContext = " + parentContext);
-      // TODO: full path of the module
-      context = parentContext.createSubcontext(name);
+      context = Util.createSubcontext(parentContext, name);
+      log.debug("Installed context " + context + " for JavaEE module " + name + ", parentContext = " + parentContext);
    }
 
    @Override
    public void stop() throws Exception
    {
-      parentContext.unbind(name);
+      Util.unbind(parentContext, name);
       context = null;
       parentContext = null;
    }

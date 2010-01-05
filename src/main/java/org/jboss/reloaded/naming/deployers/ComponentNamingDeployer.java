@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -30,72 +30,50 @@ import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.plugins.scope.ApplicationScope;
 import org.jboss.metadata.plugins.scope.DeploymentScope;
+import org.jboss.metadata.plugins.scope.InstanceScope;
 import org.jboss.reloaded.naming.deployers.dependency.ParentsLookupStrategy;
-import org.jboss.reloaded.naming.deployers.javaee.JavaEEModuleInformer;
-import org.jboss.reloaded.naming.deployers.mc.MCJavaEEModule;
-import org.jboss.reloaded.naming.spi.JavaEEApplication;
+import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
+import org.jboss.reloaded.naming.deployers.mc.MCJavaEEComponent;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
 
 import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
- * The ModuleNamingDeployer installs a JavaEEModule MC bean under the name of java:module
- * within an application scope with the JavaEE application name and an deployment scope
- * with the JavaEE module name.
- *
- * The JavaEEApplication MC bean will take care of initiating the java:app name space.
- *
- * To work properly it needs a JavaEEApplicationInformer.
- *
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class ModuleNamingDeployer extends AbstractRealDeployer
+public class ComponentNamingDeployer extends AbstractRealDeployer
 {
-   private JavaEEModuleInformer informer;
+   private JavaEEComponentInformer informer;
 
-   public ModuleNamingDeployer(JavaEEModuleInformer informer)
+   public ComponentNamingDeployer(JavaEEComponentInformer informer)
    {
       this.informer = informer;
       setInputs(informer.getRequiredAttachments());
-      addInput("java:app");
+      addInput("java:module");
       setOutput(BeanMetaData.class);
    }
 
    @Override
    protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      if(!isJavaEEModule(unit))
+      if(!informer.isJavaEEComponent(unit))
          return;
-      
-      // appName is either the name of the JavaEE application or null for a stand-alone JavaEE module
+
       String appName = informer.getApplicationName(unit);
-      String name = informer.getModulePath(unit);
+      String moduleName = informer.getModulePath(unit);
+      String name = informer.getComponentName(unit);
 
       // create JavaEEModule bean
-      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder("java:module", MCJavaEEModule.class.getName())
-         .addAnnotation(annotation(DeploymentScope.class, name))
+      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder("java:comp", MCJavaEEComponent.class.getName())
+         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+         .addAnnotation(annotation(InstanceScope.class, name))
          .addConstructorParameter(String.class.getName(), name);
+      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("java:module");
+      javaModule.setSearch(new ParentsLookupStrategy());
+      builder.addConstructorParameter(JavaEEModule.class.getName(), javaModule);
       if(appName != null)
-      {
          builder.addAnnotation(annotation(ApplicationScope.class, appName));
-         AbstractInjectionValueMetaData javaApp = new AbstractInjectionValueMetaData("java:app");
-         javaApp.setSearch(new ParentsLookupStrategy());
-         builder.addConstructorParameter(JavaEEApplication.class.getName(), javaApp);
-      }
-      else
-         builder.addConstructorParameter(JavaEEApplication.class.getName(), (Object) null);
-      builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));
 
       unit.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
-   }
-
-   /**
-    * Determine whether the given deployment unit is a JavaEE module which needs
-    * a java:module name space.
-    * @param unit
-    * @return
-    */
-   protected boolean isJavaEEModule(DeploymentUnit unit)
-   {
-      return informer.getModuleType(unit) != null;
    }
 }

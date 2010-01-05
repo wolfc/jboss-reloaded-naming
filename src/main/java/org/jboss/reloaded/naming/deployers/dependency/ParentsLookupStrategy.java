@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,36 +19,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers.mc;
+package org.jboss.reloaded.naming.deployers.dependency;
 
-import org.jboss.logging.Logger;
-import org.jboss.reloaded.naming.spi.JavaEEApplication;
-
-import javax.naming.NamingException;
+import org.jboss.dependency.plugins.AbstractController;
+import org.jboss.dependency.plugins.graph.AbstractLookupStrategy;
+import org.jboss.dependency.spi.ControllerContext;
+import org.jboss.dependency.spi.ControllerState;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEApplication
+public class ParentsLookupStrategy extends AbstractLookupStrategy
 {
-   private static final Logger log = Logger.getLogger(MCJavaEEApplication.class);
-   
-   public MCJavaEEApplication(String name)
-   {
-      super(name);
-   }
-
    @Override
-   public void start() throws NamingException
+   protected ControllerContext getContextInternal(AbstractController controller, Object name, ControllerState state)
    {
-      context = nameSpaces.getGlobalContext().createSubcontext(name);
-      log.debug("Installed context " + context + " for JavaEE application " + name);
-   }
-
-   @Override
-   public void stop() throws NamingException
-   {
-      nameSpaces.getGlobalContext().unbind(name);
-      context = null;
+      ControllerContext context = controller.getContext(name, state);
+      if(context != null)
+         return context;
+      AbstractController parent = controller.getParentController();
+      if (parent != null)
+         return getContextInternal(parent, name, state);
+      else
+         return null;
    }
 }

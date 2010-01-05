@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -21,34 +21,39 @@
  */
 package org.jboss.reloaded.naming.deployers.mc;
 
-import org.jboss.logging.Logger;
-import org.jboss.reloaded.naming.spi.JavaEEApplication;
-
-import javax.naming.NamingException;
+import org.jboss.reloaded.naming.spi.JavaEEComponent;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
+import org.jnp.interfaces.NamingContext;
+import org.jnp.server.NamingServer;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEApplication
+public class MCJavaEEComponent extends AbstractNameSpace implements JavaEEComponent
 {
-   private static final Logger log = Logger.getLogger(MCJavaEEApplication.class);
-   
-   public MCJavaEEApplication(String name)
+   private JavaEEModule module;
+
+   public MCJavaEEComponent(String name, JavaEEModule module)
    {
       super(name);
+      this.module = module;
+   }
+
+   public JavaEEModule getModule()
+   {
+      return module;
    }
 
    @Override
-   public void start() throws NamingException
+   public void start() throws Exception
    {
-      context = nameSpaces.getGlobalContext().createSubcontext(name);
-      log.debug("Installed context " + context + " for JavaEE application " + name);
+      NamingServer srv = new NamingServer();
+      context = new NamingContext(nameSpaces.getGlobalContext().getEnvironment(), null, srv);
    }
 
    @Override
-   public void stop() throws NamingException
+   public void stop() throws Exception
    {
-      nameSpaces.getGlobalContext().unbind(name);
       context = null;
    }
 }
