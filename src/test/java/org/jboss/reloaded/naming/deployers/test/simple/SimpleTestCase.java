@@ -38,17 +38,20 @@ import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.metadata.ear.jboss.JBossAppMetaData;
 import org.jboss.reloaded.naming.deployers.test.common.DummiesMetaData;
+import org.jboss.reloaded.naming.deployers.test.common.DummyContainer;
 import org.jboss.reloaded.naming.service.NameSpaces;
+import org.jboss.util.naming.Util;
 import org.jboss.virtual.AssembledDirectory;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import java.net.URL;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -164,17 +167,38 @@ public class SimpleTestCase
    }
 
    @Test
-   @Ignore
    public void testComponents() throws Exception
    {
       AssembledDirectory root = AssembledDirectory.createAssembledDirectory("components", "components.jar");
       VFSDeployment deployment = new AbstractVFSDeployment(root);
+      //((MutableAttachments) deployment.getPredeterminedManagedObjects()).addAttachment(DummiesMetaData.class, DummiesMetaData.create("A", "B"));
       ((MutableAttachments) deployment.getPredeterminedManagedObjects()).addAttachment(DummiesMetaData.class, DummiesMetaData.create("A", "B"));
       mainDeployer.deploy(deployment);
 
       // basically the lookup is what really checks the functionality, not null is a bonus
       assertNotNull(ctx.lookup("java:global"));
-      assertNotNull(ctx.lookup("java:global/components"));
+      Context c = (Context) ctx.lookup("java:global/components");
+      assertNotNull(c);
+
+      Util.bind(c, "test", "Hello world");
+
+      DummyContainer containerA = (DummyContainer) ctx.lookup("java:global/components/A");
+
+      String result = (String) containerA.getValue("java:module/test");
+      assertEquals("Hello world", result);
+
+      DummyContainer containerB = (DummyContainer) ctx.lookup("java:global/components/B");
+
+      containerA.setValue("java:comp/local", "a local value");
+      try
+      {
+         containerB.getValue("java:comp/local");
+      }
+      catch(RuntimeException e)
+      {
+         // good
+         // TODO: should be a NameNotFoundException
+      }
 
       mainDeployer.undeploy(deployment);
 

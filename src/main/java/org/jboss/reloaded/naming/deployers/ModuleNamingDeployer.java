@@ -85,7 +85,7 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
          builder.addConstructorParameter(JavaEEApplication.class.getName(), (Object) null);
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));
 
-      unit.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
+      unit.addAttachment("java:module:" + BeanMetaData.class, builder.getBeanMetaData());
    }
 
    /**

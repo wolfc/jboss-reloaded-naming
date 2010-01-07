@@ -19,77 +19,61 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers;
+package org.jboss.reloaded.naming.deployers.test.common;
 
 import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
+import org.jboss.dependency.plugins.graph.Search;
 import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
+import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.plugins.scope.ApplicationScope;
 import org.jboss.metadata.plugins.scope.DeploymentScope;
 import org.jboss.metadata.plugins.scope.InstanceScope;
-import org.jboss.reloaded.naming.deployers.dependency.ParentsLookupStrategy;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
-import org.jboss.reloaded.naming.deployers.mc.MCJavaEEComponent;
-import org.jboss.reloaded.naming.spi.JavaEEModule;
+import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
 import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class ComponentNamingDeployer extends AbstractRealDeployer
+public class DummyDeployer extends AbstractSimpleRealDeployer<DummyMetaData>
 {
    private JavaEEComponentInformer informer;
-
-   public ComponentNamingDeployer(JavaEEComponentInformer informer)
+   
+   public DummyDeployer()
    {
-      this.informer = informer;
-      setInputs(informer.getRequiredAttachments());
-      addInput("java:module");
+      super(DummyMetaData.class);
       setOutput(BeanMetaData.class);
-      // if we don't work on components only you'll see a duplicate install of java:module
-      // because AbstractDeploymentUnit.getAttachments inherits attachments from the parent.
       setComponentsOnly(true);
+      //setUseUnitName(true);
    }
 
    @Override
-   protected void internalDeploy(DeploymentUnit unit) throws DeploymentException
+   public void deploy(DeploymentUnit unit, DummyMetaData deployment) throws DeploymentException
    {
-      if(!informer.isJavaEEComponent(unit))
-         return;
-
       String appName = informer.getApplicationName(unit);
       String moduleName = informer.getModulePath(unit);
       String name = informer.getComponentName(unit);
 
       // create JavaEEModule bean
-      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder("java:comp", MCJavaEEComponent.class.getName())
+      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, DummyContainer.class.getName())
          .addAnnotation(annotation(DeploymentScope.class, moduleName))
-         .addAnnotation(annotation(InstanceScope.class, name))
-         .addConstructorParameter(String.class.getName(), name);
+         .addAnnotation(annotation(InstanceScope.class, name));
       if(appName != null)
          builder.addAnnotation(annotation(ApplicationScope.class, appName));
-      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("java:module");
-      javaModule.setSearch(new ParentsLookupStrategy());
-      builder.addConstructorParameter(JavaEEModule.class.getName(), javaModule);
-      builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));      
+      AbstractInjectionValueMetaData javaComponent = new AbstractInjectionValueMetaData("java:comp");
+      javaComponent.setSearch(Search.LOCAL);
+      builder.addConstructorParameter(JavaEEComponent.class.getName(), javaComponent);
 
-      // VDF can't do component composition, so each BMD must be in a separate component
-      DeploymentUnit component = unit.getParent().addComponent(name + ".java:comp");
-      component.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
+      unit.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
    }
 
-   @Override
-   protected void internalUndeploy(DeploymentUnit unit)
+   public void setJavaEEComponentInformer(JavaEEComponentInformer informer)
    {
-      if(!informer.isJavaEEComponent(unit))
-         return;
-      
-      String name = informer.getComponentName(unit);
-      unit.removeComponent(name + ".java:comp");
+      this.informer = informer;
    }
 }

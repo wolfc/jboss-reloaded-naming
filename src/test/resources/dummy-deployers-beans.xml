@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
    <bean name="DummiesDeployer" class="org.jboss.reloaded.naming.deployers.test.common.DummiesDeployer"/>
+   <bean name="DummyDeployer" class="org.jboss.reloaded.naming.deployers.test.common.DummyDeployer">
+      <property name="javaEEComponentInformer"><inject bean="JavaEEComponentInformer"/></property>      
+   </bean>
 </deployment>
