@@ -43,7 +43,7 @@
       <dependency>
          <groupId>org.jboss.reloaded</groupId>
          <artifactId>jboss-reloaded-naming</artifactId>
-         <version>0.1.0-SNAPSHOT</version>
+         <version>0.1.0-alpha-2</version>
       </dependency>
    </dependencies>
 </project>
