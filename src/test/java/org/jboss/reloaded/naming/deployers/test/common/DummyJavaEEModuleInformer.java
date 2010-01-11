@@ -46,7 +46,7 @@ public class DummyJavaEEModuleInformer extends DummyJavaEEApplicationInformer im
    public ModuleType getModuleType(DeploymentUnit deploymentUnit)
    {
       if(deploymentUnit.getSimpleName().endsWith(".jar"))
-         return ModuleType.JAVA;
+         return ModuleType.EJB;
       return null;
    }
 

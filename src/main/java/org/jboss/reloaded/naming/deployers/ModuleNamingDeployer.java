@@ -96,6 +96,8 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
     */
    protected boolean isJavaEEModule(DeploymentUnit unit)
    {
-      return informer.getModuleType(unit) != null;
+      // TODO: isn't this using too much inside information? It would be better to have the deployer execute explicitly on naming meta data.
+      JavaEEModuleInformer.ModuleType type = informer.getModuleType(unit);
+      return type != null && type != JavaEEModuleInformer.ModuleType.JAVA;
    }
 }
