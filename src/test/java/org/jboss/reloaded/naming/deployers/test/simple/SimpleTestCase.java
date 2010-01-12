@@ -244,6 +244,36 @@ public class SimpleTestCase
       assertNameNotFound("java:global/standalone");
    }
 
+   // make sure we don't undeploy the wrong module (because of BeanMetaDataDeployer.undeploy ignoring scope)
+   @Test
+   public void testStandaloneModule2() throws Exception
+   {
+      AssembledDirectory root1 = AssembledDirectory.createAssembledDirectory("standalone1", "standalone1.jar");
+      VFSDeployment deployment1 = new AbstractVFSDeployment(root1);
+      mainDeployer.deploy(deployment1);
+
+      AssembledDirectory root2 = AssembledDirectory.createAssembledDirectory("standalone2", "standalone2.jar");
+      VFSDeployment deployment2 = new AbstractVFSDeployment(root2);
+      mainDeployer.deploy(deployment2);
+
+      // basically the lookup is what really checks the functionality, not null is a bonus
+      assertNotNull(ctx.lookup("java:global/standalone1"));
+      assertNotNull(ctx.lookup("java:global/standalone2"));
+
+      mainDeployer.undeploy(deployment2);
+
+//      assertNotNull(ctx.lookup("java:global/standalone1"));
+//      assertNameNotFound("java:global/standalone2");
+
+      mainDeployer.deploy(deployment2);
+
+      assertNotNull(ctx.lookup("java:global/standalone1"));
+      assertNotNull(ctx.lookup("java:global/standalone2"));
+      
+      mainDeployer.undeploy(deployment1);
+      mainDeployer.undeploy(deployment2);
+   }
+
    protected static void validate() throws Exception
    {
       try

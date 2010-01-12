@@ -68,12 +68,17 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
       
       // appName is either the name of the JavaEE application or null for a stand-alone JavaEE module
       String appName = informer.getApplicationName(unit);
-      String name = informer.getModulePath(unit);
+      String moduleName = informer.getModulePath(unit);
 
       // create JavaEEModule bean
-      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder("java:module", MCJavaEEModule.class.getName())
-         .addAnnotation(annotation(DeploymentScope.class, name))
-         .addConstructorParameter(String.class.getName(), name);
+      String name = "jboss.naming:";
+      if(appName != null)
+         name += "application=" + appName + ",";
+      name += "module=" + moduleName;
+      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEModule.class.getName())
+         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+         .addConstructorParameter(String.class.getName(), moduleName)
+         .addAlias("java:module");
       if(appName != null)
       {
          builder.addAnnotation(annotation(ApplicationScope.class, appName));
