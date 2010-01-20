@@ -21,15 +21,7 @@
  */
 package org.jboss.reloaded.naming.test.interceptor.unit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
-import javax.naming.NamingException;
-
 import org.jboss.reloaded.naming.simple.SimpleJavaEEComponent;
-import org.jboss.reloaded.naming.simple.SimpleJavaEEModule;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.jboss.reloaded.naming.test.common.AbstractNamingTestCase;
@@ -37,7 +29,15 @@ import org.jboss.reloaded.naming.test.interceptor.NamingInvocationHandler;
 import org.jboss.reloaded.naming.test.interceptor.ValueHolder;
 import org.jboss.reloaded.naming.test.interceptor.ValueHolderBean;
 import org.jboss.util.naming.Util;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import javax.naming.NamingException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Since we provide an abstract interceptor, might as well test it. :-)
@@ -47,10 +47,23 @@ import org.junit.Test;
  */
 public class InterceptorTestCase extends AbstractNamingTestCase
 {
+   private JavaEEModule module;
+
+   @After
+   public void after() throws NamingException
+   {
+      javaGlobal.unbind(module.getName());
+   }
+
+   @Before
+   public void before() throws NamingException
+   {
+      this.module = createStandaloneModule("module");
+   }
+
    @Test
    public void test1() throws NamingException
    {
-      JavaEEModule module = new SimpleJavaEEModule("module", createContext(iniCtx.getEnvironment()), null);
       JavaEEComponent component = new SimpleJavaEEComponent("intercepted", createContext(iniCtx.getEnvironment()), module);
       
       Util.rebind(component.getContext(), "env/value", "Hello intercepted");

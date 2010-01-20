@@ -63,13 +63,6 @@ public class SimpleTestCase extends AbstractNamingTestCase
       return component;
    }
 
-   protected static JavaEEModule createModule(String moduleName) throws NamingException
-   {
-      Context context = javaGlobal.createSubcontext(moduleName);
-      JavaEEModule module = new SimpleJavaEEModule(moduleName, context, null);
-      return module;
-   }
-
    protected static JavaEEModule createModule(JavaEEApplication app, String moduleName) throws NamingException
    {
       Context context = app.getContext().createSubcontext(moduleName);
@@ -86,7 +79,7 @@ public class SimpleTestCase extends AbstractNamingTestCase
    @Before
    public void before() throws NamingException
    {
-      module = createModule("a_module");
+      module = createStandaloneModule("a_module");
       component = createComponent(module, "a_component");
 
       Util.rebind(component.getContext(), "env/value", "Hello world");

@@ -23,11 +23,6 @@ package org.jboss.reloaded.naming.test.legacy.unit;
 
 import junit.framework.Assert;
 import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.CurrentComponent;
-import org.jboss.reloaded.naming.simple.SimpleJavaEEComponent;
-import org.jboss.reloaded.naming.simple.SimpleJavaEEModule;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
-import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.jboss.reloaded.naming.test.common.AbstractNamingTestCase;
 import org.jboss.util.naming.Util;
 import org.junit.Test;
@@ -35,10 +30,11 @@ import org.junit.Test;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
+ * Some simple tests against the legacy java:comp (ENCFactory).
+ * 
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
  * @version $Revision: $
  */
@@ -106,103 +102,6 @@ public class LegacyTestCase extends AbstractNamingTestCase
       finally
       {
          ENCFactory.popContextId();
-      }
-   }
-
-   @Test
-   public void testLegacyCallingNew() throws NamingException
-   {
-      final String newValue = "testNewCallingLegacy new";
-      final String legacyValue = "testNewCallingLegacy legacy";
-      
-      JavaEEModule module = new SimpleJavaEEModule("module", createContext(iniCtx.getEnvironment()), null);
-      JavaEEComponent component = new SimpleJavaEEComponent("new", createContext(iniCtx.getEnvironment()), module);
-      
-      Util.rebind(component.getContext(), "env/value", newValue);
-
-      ENCFactory.pushContextId("legacy");
-      try
-      {
-         Context ctx = (Context) iniCtx.lookup("java:comp");
-         Util.rebind(ctx, "env/value", legacyValue);
-      }
-      finally
-      {
-         ENCFactory.popContextId();
-      }
-      
-      ENCFactory.pushContextId("legacy");
-      try
-      {
-         String value = (String) iniCtx.lookup("java:comp/env/value");
-         assertEquals(legacyValue, value);
-         
-         CurrentComponent.push(component);
-         try
-         {
-            value = (String) iniCtx.lookup("java:comp/env/value");
-            assertEquals(newValue, value);
-         }
-         finally
-         {
-            CurrentComponent.pop();
-         }
-         
-         value = (String) iniCtx.lookup("java:comp/env/value");
-         assertEquals(legacyValue, value);
-      }
-      finally
-      {
-         ENCFactory.popContextId();
-      }
-      
-   }
-   
-   @Test
-   public void testNewCallingLegacy() throws NamingException
-   {
-      final String newValue = "testNewCallingLegacy new";
-      final String legacyValue = "testNewCallingLegacy legacy";
-      
-      JavaEEModule module = new SimpleJavaEEModule("module", createContext(iniCtx.getEnvironment()), null);
-      JavaEEComponent component = new SimpleJavaEEComponent("new", createContext(iniCtx.getEnvironment()), module);
-      
-      Util.rebind(component.getContext(), "env/value", newValue);
-
-      ENCFactory.pushContextId("legacy");
-      try
-      {
-         Context ctx = (Context) iniCtx.lookup("java:comp");
-         Util.rebind(ctx, "env/value", legacyValue);
-      }
-      finally
-      {
-         ENCFactory.popContextId();
-      }
-      
-      CurrentComponent.push(component);
-      try
-      {
-         String value = (String) iniCtx.lookup("java:comp/env/value");
-         assertEquals(newValue, value);
-         
-         ENCFactory.pushContextId("legacy");
-         try
-         {
-            value = (String) iniCtx.lookup("java:comp/env/value");
-            assertEquals(legacyValue, value);
-         }
-         finally
-         {
-            ENCFactory.popContextId();
-         }
-         
-         value = (String) iniCtx.lookup("java:comp/env/value");
-         assertEquals(newValue, value);
-      }
-      finally
-      {
-         CurrentComponent.pop();
       }
    }
 }

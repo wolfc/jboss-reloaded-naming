@@ -22,6 +22,10 @@
 package org.jboss.reloaded.naming.test.common;
 
 import org.jboss.reloaded.naming.service.NameSpaces;
+import org.jboss.reloaded.naming.simple.SimpleJavaEEApplication;
+import org.jboss.reloaded.naming.simple.SimpleJavaEEModule;
+import org.jboss.reloaded.naming.spi.JavaEEApplication;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.jnp.interfaces.NamingContext;
 import org.jnp.server.NamingServer;
 import org.jnp.server.SingletonNamingServer;
@@ -72,4 +76,13 @@ public abstract class AbstractNamingTestCase
       NamingServer srv = new NamingServer();
       return new NamingContext(environment, null, srv);
    }
+
+   protected static JavaEEModule createStandaloneModule(String moduleName) throws NamingException
+   {
+      Context context = javaGlobal.createSubcontext(moduleName);
+      // standalone == app
+      JavaEEApplication application = new SimpleJavaEEApplication(moduleName, context);
+      JavaEEModule module = new SimpleJavaEEModule(moduleName, context, application);
+      return module;
+   }   
 }

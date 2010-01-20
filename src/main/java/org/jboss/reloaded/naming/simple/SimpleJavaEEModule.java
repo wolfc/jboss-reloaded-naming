@@ -21,10 +21,10 @@
  */
 package org.jboss.reloaded.naming.simple;
 
-import javax.naming.Context;
-
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
+
+import javax.naming.Context;
 
 /**
  * A simple implementation of {@link JavaEEModule}.
@@ -49,6 +49,8 @@ public class SimpleJavaEEModule implements JavaEEModule
    {
       assert name != null : "name is null";
       assert context != null : "context is null";
+      // JavaEE 6 FR 5.2.2: “single application” means a single deployment unit, such as a ... single module deployed standalone
+      assert application != null : "application is null";
       
       this.name = name;
       this.context = context;

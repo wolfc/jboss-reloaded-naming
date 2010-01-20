@@ -15,6 +15,7 @@
   <name>JBoss Reloaded Naming</name>
   <url>http://www.jboss.org</url>
   <description>
+     Provide the facilities to fulfil the naming requirements of the JavaEE specification.
   </description>
   
   <build>
@@ -29,14 +30,7 @@
   </build>
 
   <dependencies>
-    <!--
-    <dependency>
-      <groupId>org.jboss.bootstrap</groupId>
-      <artifactId>jboss-bootstrap</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    -->
+    <!-- unscoped, because we depend on ENCFactory for legacy integration -->
     <dependency>
       <groupId>org.jboss.naming</groupId>
       <artifactId>jnpserver</artifactId>
