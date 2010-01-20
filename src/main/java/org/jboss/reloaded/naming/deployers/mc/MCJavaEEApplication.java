@@ -42,6 +42,8 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
    public void start() throws NamingException
    {
       context = nameSpaces.getGlobalContext().createSubcontext(name);
+      // JavaEE 6 5.15
+      context.bind("AppName", name);
       log.debug("Installed context " + context + " for JavaEE application " + name);
    }
 

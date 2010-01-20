@@ -54,6 +54,8 @@ public class MCJavaEEModule extends AbstractNameSpace implements JavaEEModule
    {
       parentContext = (application != null ? application.getContext() : nameSpaces.getGlobalContext());
       context = Util.createSubcontext(parentContext, name);
+      // JavaEE 6 5.15
+      context.bind("ModuleName", name);
       log.debug("Installed context " + context + " for JavaEE module " + name + ", application = " + application + ", parentContext = " + parentContext);
    }
 

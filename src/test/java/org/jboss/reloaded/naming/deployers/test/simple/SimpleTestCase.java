@@ -37,6 +37,7 @@ import org.jboss.kernel.plugins.bootstrap.basic.BasicBootstrap;
 import org.jboss.kernel.plugins.deployment.xml.BasicXMLDeployer;
 import org.jboss.kernel.spi.deployment.KernelDeployment;
 import org.jboss.metadata.ear.jboss.JBossAppMetaData;
+import org.jboss.reloaded.naming.deployers.test.common.AbstractNamingDeployersTestCase;
 import org.jboss.reloaded.naming.deployers.test.common.DummiesMetaData;
 import org.jboss.reloaded.naming.deployers.test.common.DummyContainer;
 import org.jboss.reloaded.naming.service.NameSpaces;
@@ -58,84 +59,8 @@ import static org.junit.Assert.fail;
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class SimpleTestCase
+public class SimpleTestCase extends AbstractNamingDeployersTestCase
 {
-   private static Kernel kernel;
-   private static BasicXMLDeployer deployer;
-   private static MainDeployer mainDeployer;
-   private static InitialContext ctx;
-
-   protected static final void assertNameNotFound(String name) throws NamingException
-   {
-      try
-      {
-         ctx.lookup(name);
-         fail("Expected NameNotFoundException for " + name);
-      }
-      catch(NameNotFoundException e)
-      {
-         // good
-      }
-   }
-
-   @BeforeClass
-   public static void beforeClass() throws Exception
-   {
-      AbstractBootstrap bootstrap = new BasicBootstrap();
-      bootstrap.run();
-      kernel = bootstrap.getKernel();
-      deployer = new BasicXMLDeployer(kernel, ControllerMode.AUTOMATIC);
-
-      deploy(SimpleTestCase.class.getClassLoader(), "classloader.xml");
-      deploy(SimpleTestCase.class.getClassLoader(), "deployers.xml");
-
-      mainDeployer = getBean("MainDeployer", ControllerState.INSTALLED, MainDeployer.class);
-
-      deploy(SimpleTestCase.class.getClassLoader(), "jndi-beans.xml");
-      deploy(SimpleTestCase.class.getClassLoader(), "reloaded-naming-deployers-beans.xml");
-
-      deploy(SimpleTestCase.class.getClassLoader(), "dummy-deployers-beans.xml");
-
-      ctx = new InitialContext();
-   }
-
-   protected static <T> T getBean(String name, ControllerState state, Class<T> expectedType)
-   {
-      ControllerContext context = kernel.getController().getContext(name, state);
-      return expectedType.cast(context.getTarget());
-   }
-   
-   protected static KernelDeployment deploy(URL url) throws Exception
-   {
-      try
-      {
-         return deployer.deploy(url);
-      }
-      catch(Throwable t)
-      {
-         if(t instanceof Error)
-            throw (Error) t;
-         if(t instanceof RuntimeException)
-            throw (RuntimeException) t;
-         throw (Exception) t;
-      }
-   }
-
-   public static KernelDeployment deploy(ClassLoader cl, String resource) throws Exception
-   {
-      URL url = cl.getResource(resource);
-      if(url == null)
-         throw new IllegalArgumentException("Can't find resource '" + resource + "'");
-      try
-      {
-         return deploy(url);
-      }
-      finally
-      {
-         validate();
-      }
-   }
-
    @Test
    public void test1() throws Exception
    {
@@ -272,21 +197,5 @@ public class SimpleTestCase
       
       mainDeployer.undeploy(deployment1);
       mainDeployer.undeploy(deployment2);
-   }
-
-   protected static void validate() throws Exception
-   {
-      try
-      {
-         deployer.validate();
-      }
-      catch(Throwable t)
-      {
-         if(t instanceof Error)
-            throw (Error) t;
-         if(t instanceof RuntimeException)
-            throw (RuntimeException) t;
-         throw (Exception) t;
-      }
    }
 }

@@ -60,7 +60,7 @@ public class DummiesDeployer extends AbstractComponentDeployer<DummiesMetaData, 
       @Override
       protected String getComponentName(DummyMetaData attachment)
       {
-         return attachment.getName();
+         return DummyMetaData.class.getName() + "." + attachment.getName();
       }
    }
 }

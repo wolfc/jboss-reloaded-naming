@@ -84,8 +84,10 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));      
 
       // VDF can't do component composition, so each BMD must be in a separate component
-      DeploymentUnit component = unit.getParent().addComponent(componentName + ".java:comp");
-      component.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
+      //DeploymentUnit component = unit.getParent().addComponent(componentName + ".java:comp");
+      //component.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
+      // putting this into a separate component will make uninstall throw a fit, so lets put it in the parent with an unique name
+      unit.getParent().addAttachment(BeanMetaData.class.getName() + "." + name, builder.getBeanMetaData());
    }
 
    @Override

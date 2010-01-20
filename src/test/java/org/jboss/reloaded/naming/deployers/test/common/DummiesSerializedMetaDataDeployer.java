@@ -21,24 +21,36 @@
  */
 package org.jboss.reloaded.naming.deployers.test.common;
 
-import java.io.Serializable;
+import org.jboss.deployers.vfs.spi.deployer.AbstractVFSParsingDeployer;
+import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
+import org.jboss.virtual.VirtualFile;
+
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public class DummyMetaData implements Serializable
+public class DummiesSerializedMetaDataDeployer extends AbstractVFSParsingDeployer<DummiesMetaData>
 {
-   private static final long serialVersionUID = 1L;
-
-   private String name;
-
-   public DummyMetaData(String s)
+   public DummiesSerializedMetaDataDeployer()
    {
-      this.name = s;
+      super(DummiesMetaData.class);
+      setSuffix("dummy-components.ser");
    }
 
-   public String getName()
+   @Override
+   protected DummiesMetaData parse(VFSDeploymentUnit unit, VirtualFile file, DummiesMetaData root) throws Exception
    {
-      return name;
+      InputStream in = openStreamAndValidate(file);
+      try
+      {
+         ObjectInputStream ois = new ObjectInputStream(in);
+         return (DummiesMetaData) ois.readObject();
+      }
+      finally
+      {
+         in.close();
+      }
    }
 }

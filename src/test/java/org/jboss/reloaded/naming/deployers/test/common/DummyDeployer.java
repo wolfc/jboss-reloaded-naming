@@ -57,19 +57,25 @@ public class DummyDeployer extends AbstractSimpleRealDeployer<DummyMetaData>
    {
       String appName = informer.getApplicationName(unit);
       String moduleName = informer.getModulePath(unit);
-      String name = informer.getComponentName(unit);
+      String componentName = informer.getComponentName(unit);
 
-      // create JavaEEModule bean
+      // create dummy container bean
+      String name = "jboss.dummy:";
+      if(appName != null)
+         name += "application=" + appName + ",";
+      name += "module=" + moduleName + ",component=" + componentName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, DummyContainer.class.getName())
          .addAnnotation(annotation(DeploymentScope.class, moduleName))
-         .addAnnotation(annotation(InstanceScope.class, name));
+         .addAnnotation(annotation(InstanceScope.class, componentName))
+         .addAlias(componentName);
       if(appName != null)
          builder.addAnnotation(annotation(ApplicationScope.class, appName));
       AbstractInjectionValueMetaData javaComponent = new AbstractInjectionValueMetaData("java:comp");
       javaComponent.setSearch(Search.LOCAL);
       builder.addConstructorParameter(JavaEEComponent.class.getName(), javaComponent);
 
-      unit.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
+      unit.getParent().addAttachment(BeanMetaData.class.getName() + "." + name, builder.getBeanMetaData());
+      //unit.addAttachment(BeanMetaData.class, builder.getBeanMetaData());
    }
 
    public void setJavaEEComponentInformer(JavaEEComponentInformer informer)

@@ -71,7 +71,7 @@ public class AppNamingDeployer extends AbstractRealDeployer
          .addConstructorParameter(String.class.getName(), appName)
          .addAlias("java:app");
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));
-      deploymentUnit.addAttachment("java:app:" + BeanMetaData.class, builder.getBeanMetaData());
+      deploymentUnit.addAttachment(BeanMetaData.class + "." + name, builder.getBeanMetaData());
    }
 
    protected boolean isJavaEEApplication(DeploymentUnit deploymentUnit)

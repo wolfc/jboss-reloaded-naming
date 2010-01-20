@@ -102,5 +102,7 @@ public class DummyContainer
       if(ctx != null)
          ctx.close();
       ctx = null;
+
+      log.info("Stopped container " + this);
    }
 }
