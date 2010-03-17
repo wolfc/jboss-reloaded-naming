@@ -28,15 +28,9 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.metadata.plugins.scope.ApplicationScope;
-import org.jboss.metadata.plugins.scope.DeploymentScope;
-import org.jboss.metadata.plugins.scope.InstanceScope;
-import org.jboss.reloaded.naming.deployers.dependency.ParentsLookupStrategy;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 import org.jboss.reloaded.naming.deployers.mc.MCJavaEEComponent;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
-
-import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
@@ -49,7 +43,7 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
    {
       this.informer = informer;
       setInputs(informer.getRequiredAttachments());
-      addInput("java:module");
+//      addInput("java:module");
       setOutput(BeanMetaData.class);
       // if we don't work on components only you'll see a duplicate install of java:module
       // because AbstractDeploymentUnit.getAttachments inherits attachments from the parent.
@@ -72,14 +66,16 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
          name += "application=" + appName + ",";
       name += "module=" + moduleName + ",component=" + componentName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEComponent.class.getName())
-         .addAnnotation(annotation(DeploymentScope.class, moduleName))
-         .addAnnotation(annotation(InstanceScope.class, componentName))
+//         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+//         .addAnnotation(annotation(InstanceScope.class, componentName))
          .addConstructorParameter(String.class.getName(), componentName)
-         .addAlias("java:comp");
-      if(appName != null)
-         builder.addAnnotation(annotation(ApplicationScope.class, appName));
-      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("java:module");
-      javaModule.setSearch(new ParentsLookupStrategy());
+//         .addAlias("java:comp")
+         ;
+//      if(appName != null)
+//         builder.addAnnotation(annotation(ApplicationScope.class, appName));
+//      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("java:module");
+//      javaModule.setSearch(new ParentsLookupStrategy());
+      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("jboss.naming:" + (appName != null ? "application=" + appName + "," : "") + "module=" + moduleName);
       builder.addConstructorParameter(JavaEEModule.class.getName(), javaModule);
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));      
 

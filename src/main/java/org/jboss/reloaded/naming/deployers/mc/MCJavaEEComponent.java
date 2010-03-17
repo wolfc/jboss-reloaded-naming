@@ -61,4 +61,13 @@ public class MCJavaEEComponent extends AbstractNameSpace implements JavaEECompon
    {
       context = null;
    }
+
+   @Override
+   public String toString()
+   {
+      return "MCJavaEEComponent{" +
+         "module=" + module +
+         ", name='" + name + '\'' +
+         '}';
+   }
 }

@@ -27,11 +27,8 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.metadata.plugins.scope.ApplicationScope;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEApplicationInformer;
 import org.jboss.reloaded.naming.deployers.mc.MCJavaEEApplication;
-
-import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
  * The AppNamingDeployer installs a JavaEEApplication MC bean under the name of java:app
@@ -53,7 +50,7 @@ public class AppNamingDeployer extends AbstractRealDeployer
          throw new NullPointerException("informer is null");
       this.informer = informer;
       setInputs(informer.getRequiredAttachments());
-      setOutputs("java:app");
+//      setOutputs("java:app");
       setOutput(BeanMetaData.class);
    }
 
@@ -67,9 +64,10 @@ public class AppNamingDeployer extends AbstractRealDeployer
       // because BeanMetaDataDeployer.undeploy needs an unique name
       String name = "jboss.naming:application=" + appName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEApplication.class.getName())
-         .addAnnotation(annotation(ApplicationScope.class, appName))
+         //.addAnnotation(annotation(ApplicationScope.class, appName))
          .addConstructorParameter(String.class.getName(), appName)
-         .addAlias("java:app");
+         //.addAlias("java:app")
+         ;
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));
       deploymentUnit.addAttachment(BeanMetaData.class + "." + name, builder.getBeanMetaData());
    }

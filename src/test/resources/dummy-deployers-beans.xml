@@ -5,4 +5,6 @@
    <bean name="DummyDeployer" class="org.jboss.reloaded.naming.deployers.test.common.DummyDeployer">
       <property name="javaEEComponentInformer"><inject bean="JavaEEComponentInformer"/></property>      
    </bean>
+
+   <bean name="ExceptionDeployer" class="org.jboss.reloaded.naming.deployers.test.common.ExceptionDeployer"/>
 </deployment>

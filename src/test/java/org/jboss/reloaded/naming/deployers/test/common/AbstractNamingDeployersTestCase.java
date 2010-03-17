@@ -44,7 +44,7 @@ import static org.junit.Assert.fail;
  */
 public abstract class AbstractNamingDeployersTestCase
 {
-   private static Kernel kernel;
+   protected static Kernel kernel;
    private static BasicXMLDeployer deployer;
    protected static MainDeployer mainDeployer;
    protected static InitialContext ctx;

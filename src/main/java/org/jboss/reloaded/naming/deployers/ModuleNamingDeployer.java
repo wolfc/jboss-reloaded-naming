@@ -29,7 +29,6 @@ import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.plugins.scope.ApplicationScope;
-import org.jboss.metadata.plugins.scope.DeploymentScope;
 import org.jboss.reloaded.naming.deployers.dependency.ParentsLookupStrategy;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEModuleInformer;
 import org.jboss.reloaded.naming.deployers.mc.MCJavaEEModule;
@@ -56,7 +55,7 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
    {
       this.informer = informer;
       setInputs(informer.getRequiredAttachments());
-      addInput("java:app");
+//      addInput("java:app");
       setOutput(BeanMetaData.class);
    }
 
@@ -76,14 +75,16 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
          name += "application=" + appName + ",";
       name += "module=" + moduleName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEModule.class.getName())
-         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+//         .addAnnotation(annotation(DeploymentScope.class, moduleName))
          .addConstructorParameter(String.class.getName(), moduleName)
-         .addAlias("java:module");
+//         .addAlias("java:module")
+         ;
       if(appName != null)
       {
-         builder.addAnnotation(annotation(ApplicationScope.class, appName));
-         AbstractInjectionValueMetaData javaApp = new AbstractInjectionValueMetaData("java:app");
-         javaApp.setSearch(new ParentsLookupStrategy());
+//         builder.addAnnotation(annotation(ApplicationScope.class, appName));
+//         AbstractInjectionValueMetaData javaApp = new AbstractInjectionValueMetaData("java:app");
+//         javaApp.setSearch(new ParentsLookupStrategy());
+         AbstractInjectionValueMetaData javaApp = new AbstractInjectionValueMetaData("jboss.naming:application=" + appName);
          builder.addConstructorParameter(JavaEEApplication.class.getName(), javaApp);
       }
       else

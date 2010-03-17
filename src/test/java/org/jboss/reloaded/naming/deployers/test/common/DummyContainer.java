@@ -37,7 +37,7 @@ public class DummyContainer
 {
    private static Logger log = Logger.getLogger(DummyContainer.class);
    
-   private JavaEEComponent component;
+   private final JavaEEComponent component;
    private InitialContext ctx;
 
    public DummyContainer(JavaEEComponent component)
@@ -104,5 +104,13 @@ public class DummyContainer
       ctx = null;
 
       log.info("Stopped container " + this);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "DummyContainer{" +
+         "component=" + component +
+         '}';
    }
 }

@@ -53,4 +53,12 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
       nameSpaces.getGlobalContext().unbind(name);
       context = null;
    }
+
+   @Override
+   public String toString()
+   {
+      return "MCJavaEEApplication{" +
+         "name='" + name + '\'' +
+         '}';
+   }
 }

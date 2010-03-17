@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright (c) 2009, Red Hat Middleware LLC, and individual contributors
+ * Copyright (c) 2010, Red Hat Middleware LLC, and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,43 +19,31 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.reloaded.naming.deployers.mc;
+package org.jboss.reloaded.naming.deployers.test.common;
 
-import org.jboss.reloaded.naming.service.NameSpaces;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
  */
-public abstract class AbstractNameSpace
+public class ExceptionDeployer extends AbstractSimpleRealDeployer<Exception>
 {
-   protected final String name;
-   protected NameSpaces nameSpaces;
-   protected Context context;
-
-   protected AbstractNameSpace(String name)
+   public ExceptionDeployer()
    {
-      this.name = name;
-   }
-   
-   public Context getContext()
-   {
-      return context;
+      super(Exception.class);
    }
 
-   public String getName()
+   @Override
+   public void deploy(DeploymentUnit unit, Exception deployment) throws DeploymentException
    {
-      return name;
+      throw new DeploymentException(deployment);
    }
 
-   public void setNameSpaces(NameSpaces nameSpaces)
+   @Override
+   public void undeploy(DeploymentUnit unit, Exception deployment)
    {
-      this.nameSpaces = nameSpaces;
+      log.info("undeploy " + unit);
    }
-
-   public abstract void start() throws Exception;
-
-   public abstract void stop() throws Exception;
 }

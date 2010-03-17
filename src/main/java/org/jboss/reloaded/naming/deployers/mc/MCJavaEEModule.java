@@ -66,4 +66,13 @@ public class MCJavaEEModule extends AbstractNameSpace implements JavaEEModule
       context = null;
       parentContext = null;
    }
+
+   @Override
+   public String toString()
+   {
+      return "MCJavaEEModule{" +
+         "application=" + application +
+         ", name='" + name + '\'' +
+         '}';
+   }
 }

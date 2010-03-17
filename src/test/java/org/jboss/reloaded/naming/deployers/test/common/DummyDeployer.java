@@ -25,13 +25,10 @@ import org.jboss.beans.metadata.plugins.AbstractInjectionValueMetaData;
 import org.jboss.beans.metadata.plugins.builder.BeanMetaDataBuilderFactory;
 import org.jboss.beans.metadata.spi.BeanMetaData;
 import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
-import org.jboss.dependency.plugins.graph.Search;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.plugins.scope.ApplicationScope;
-import org.jboss.metadata.plugins.scope.DeploymentScope;
-import org.jboss.metadata.plugins.scope.InstanceScope;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
@@ -65,13 +62,15 @@ public class DummyDeployer extends AbstractSimpleRealDeployer<DummyMetaData>
          name += "application=" + appName + ",";
       name += "module=" + moduleName + ",component=" + componentName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, DummyContainer.class.getName())
-         .addAnnotation(annotation(DeploymentScope.class, moduleName))
-         .addAnnotation(annotation(InstanceScope.class, componentName))
-         .addAlias(componentName);
-      if(appName != null)
-         builder.addAnnotation(annotation(ApplicationScope.class, appName));
-      AbstractInjectionValueMetaData javaComponent = new AbstractInjectionValueMetaData("java:comp");
-      javaComponent.setSearch(Search.LOCAL);
+//         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+//         .addAnnotation(annotation(InstanceScope.class, componentName))
+//         .addAlias(componentName)
+         ;
+//      if(appName != null)
+//         builder.addAnnotation(annotation(ApplicationScope.class, appName));
+//      AbstractInjectionValueMetaData javaComponent = new AbstractInjectionValueMetaData("java:comp");
+//      javaComponent.setSearch(Search.LOCAL);
+      AbstractInjectionValueMetaData javaComponent = new AbstractInjectionValueMetaData("jboss.naming:" + (appName != null ? "application=" + appName + "," : "") + "module=" + moduleName + ",component=" + componentName);
       builder.addConstructorParameter(JavaEEComponent.class.getName(), javaComponent);
 
       unit.getParent().addAttachment(BeanMetaData.class.getName() + "." + name, builder.getBeanMetaData());

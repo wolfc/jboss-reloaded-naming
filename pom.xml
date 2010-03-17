@@ -15,17 +15,21 @@
       The integration point between Naming and VDF.
    </description>
 
+   <properties>
+      <version.org.jboss.deployers>2.2.0.Alpha1</version.org.jboss.deployers>   
+   </properties>
+
    <dependencies>
       <dependency>
          <groupId>org.jboss.deployers</groupId>
          <artifactId>jboss-deployers-vfs</artifactId>
-         <version>2.0.9.GA</version>
+         <version>${version.org.jboss.deployers}</version>
          <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>org.jboss.deployers</groupId>
          <artifactId>jboss-deployers-spi</artifactId>
-         <version>2.0.9.GA</version>
+         <version>${version.org.jboss.deployers}</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.metadata</groupId>
@@ -34,9 +38,9 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-         <groupId>org.jboss.microcontainer</groupId>
+         <groupId>org.jboss.kernel</groupId>
          <artifactId>jboss-kernel</artifactId>
-         <version>2.0.9.GA</version>
+         <version>2.2.0.Alpha2</version>
       </dependency>
       <dependency>
          <groupId>org.jboss.reloaded</groupId>
