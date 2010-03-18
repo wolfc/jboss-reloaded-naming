@@ -8,7 +8,7 @@
    <modelVersion>4.0.0</modelVersion>
 
    <artifactId>jboss-reloaded-naming-deployers</artifactId>
-   <version>0.1.0-SNAPSHOT</version>
+   <version>0.1.0</version>
    <packaging>jar</packaging>
    <name>JBoss Reloaded Naming Deployers</name>
    <description>
@@ -45,7 +45,13 @@
       <dependency>
          <groupId>org.jboss.reloaded</groupId>
          <artifactId>jboss-reloaded-naming</artifactId>
-         <version>0.1.0-SNAPSHOT</version>
+         <version>0.1.0</version>
       </dependency>
    </dependencies>
+
+  <scm>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/reloaded/tags/jboss-reloaded-naming-deployers-0.1.0</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/reloaded/tags/jboss-reloaded-naming-deployers-0.1.0</developerConnection>
+    <url>http://anonsvn.jboss.org/repos/jbossas/projects/reloaded/tags/jboss-reloaded-naming-deployers-0.1.0</url>
+  </scm>
 </project>
