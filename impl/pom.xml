@@ -1,0 +1,40 @@
+<!-- 
+  vi:ts=2:sw=2:expandtab 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.jboss.reloaded</groupId>
+    <artifactId>jboss-reloaded-build</artifactId>
+    <version>0.1.0-alpha-1</version>
+    <relativePath>../build/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>jboss-reloaded-naming</artifactId>
+  <version>0.1.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>JBoss Reloaded Naming</name>
+  <url>http://www.jboss.org</url>
+  <description>
+     Provide the facilities to fulfil the naming requirements of the JavaEE specification.
+  </description>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <!-- else you might get the snapshot, which doesn't pick up the correct classes directory -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- unscoped, because we depend on ENCFactory for legacy integration -->
+    <dependency>
+      <groupId>org.jboss.naming</groupId>
+      <artifactId>jnpserver</artifactId>
+      <version>5.0.4.GA</version>
+    </dependency>
+  </dependencies>
+</project>
