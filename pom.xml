@@ -21,6 +21,18 @@
       EE.5.2.2 Application Component Environment Namespaces.
    </description>
 
+   <developers>
+      <developer>
+         <name>Carlo de Wolf</name>
+         <email>cdewolf@redhat.com</email>
+         <organization>JBoss, a division of Red Hat, Inc.</organization>
+         <roles>
+            <role>Project Lead</role>
+         </roles>
+         <timezone>+1</timezone>
+      </developer>
+   </developers>
+
    <!-- TODO
    <url>http://www.jboss.org/</url>
    -->
@@ -36,6 +48,15 @@
          </plugin>
       </plugins>
    </build>
+
+   <dependencies>
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>4.4</version>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
 
    <dependencyManagement>
       <dependencies>
@@ -53,12 +74,10 @@
       <url>https://jira.jboss.org/jira/browse/RELOADED</url>
    </issueManagement>
 
-   <!-- TODO
    <modules>
       <module>deployers</module>
       <module>impl</module>
    </modules>
-   -->
 
    <reporting>
       <plugins>
