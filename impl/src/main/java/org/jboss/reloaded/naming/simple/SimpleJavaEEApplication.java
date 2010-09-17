@@ -21,9 +21,9 @@
  */
 package org.jboss.reloaded.naming.simple;
 
-import javax.naming.Context;
-
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
+
+import javax.naming.Context;
 
 /**
  * A simple implementation of {@link JavaEEApplication}.
@@ -35,14 +35,28 @@ public class SimpleJavaEEApplication implements JavaEEApplication
 {
    private Context context;
    private String name;
+   private Boolean isEnterpriseApplicationArchive;
 
+   @Deprecated
    public SimpleJavaEEApplication(String name, Context context)
+   {
+      this(name, context, null);
+   }
+
+   public SimpleJavaEEApplication(String name, Context context, boolean isEnterpriseApplicationArchive)
+   {
+      this(name, context, (Boolean) isEnterpriseApplicationArchive);
+   }
+
+   @Deprecated
+   protected SimpleJavaEEApplication(String name, Context context, Boolean isEnterpriseApplicationArchive)
    {
       assert name != null : "name is null";
       assert context != null : "context is null";
       
       this.name = name;
       this.context = context;
+      this.isEnterpriseApplicationArchive = isEnterpriseApplicationArchive;
    }
    
    public Context getContext()
@@ -53,5 +67,12 @@ public class SimpleJavaEEApplication implements JavaEEApplication
    public String getName()
    {
       return name;
+   }
+
+   public boolean isEnterpriseApplicationArchive()
+   {
+      if(isEnterpriseApplicationArchive == null)
+         throw new UnsupportedOperationException("isEnterpriseApplicationArchive is not set on " + this);
+      return isEnterpriseApplicationArchive.booleanValue();
    }
 }

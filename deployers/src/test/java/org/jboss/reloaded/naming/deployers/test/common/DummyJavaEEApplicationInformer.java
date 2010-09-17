@@ -41,9 +41,15 @@ public class DummyJavaEEApplicationInformer implements JavaEEApplicationInformer
       return name.substring(0, name.length() - 4);
    }
 
-   public boolean isJavaEEApplication(DeploymentUnit deploymentUnit)
+   public boolean isEnterpriseApplicationArchive(DeploymentUnit deploymentUnit)
    {
       return deploymentUnit.isAttachmentPresent(JBossAppMetaData.class);
+   }
+
+   public boolean isJavaEEApplication(DeploymentUnit deploymentUnit)
+   {
+      //return deploymentUnit.isAttachmentPresent(JBossAppMetaData.class);
+      return true;
    }
 
    public String[] getRequiredAttachments()

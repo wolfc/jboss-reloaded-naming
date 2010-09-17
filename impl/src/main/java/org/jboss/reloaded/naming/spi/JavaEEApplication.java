@@ -42,4 +42,12 @@ public interface JavaEEApplication
     * @return the name of the application
     */
    String getName();
+
+   /**
+    * JavaEE 6 EE.8.5
+    *
+    * A Java EE application is delivered as a .ear file or a
+    * stand-alone Java EE module.
+    */
+   boolean isEnterpriseApplicationArchive();
 }

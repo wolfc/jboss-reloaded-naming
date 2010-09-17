@@ -61,11 +61,14 @@ public class AppNamingDeployer extends AbstractRealDeployer
          return;
 
       String appName = informer.getApplicationName(deploymentUnit);
+      boolean isEnterpriseApplicationArchive = informer.isEnterpriseApplicationArchive(deploymentUnit);
+      
       // because BeanMetaDataDeployer.undeploy needs an unique name
       String name = "jboss.naming:application=" + appName;
       BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEApplication.class.getName())
          //.addAnnotation(annotation(ApplicationScope.class, appName))
          .addConstructorParameter(String.class.getName(), appName)
+         .addConstructorParameter(Boolean.TYPE.getName(), isEnterpriseApplicationArchive)
          //.addAlias("java:app")
          ;
       builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));

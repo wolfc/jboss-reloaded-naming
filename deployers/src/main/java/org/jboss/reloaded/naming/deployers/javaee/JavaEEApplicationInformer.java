@@ -42,6 +42,13 @@ public interface JavaEEApplicationInformer extends DeploymentUnitInformer
    String getApplicationName(DeploymentUnit deploymentUnit) throws IllegalArgumentException;
 
    /**
+    * Declares that this deployment unit is an Enterprise Application Archive.
+    * @param deploymentUnit
+    * @return true if the deployment unit is an EAR, false otherwise
+    */
+   boolean isEnterpriseApplicationArchive(DeploymentUnit deploymentUnit);
+
+   /**
     * Determine whether a deployment unit is a JavaEE application.
     * 
     * @param deploymentUnit the deployment unit to analyze

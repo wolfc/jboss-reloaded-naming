@@ -33,11 +33,19 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
 {
    private static final Logger log = Logger.getLogger(MCJavaEEApplication.class);
    
-   public MCJavaEEApplication(String name)
+   private boolean isEnterpriseApplicationArchive;
+
+   public MCJavaEEApplication(String name, boolean isEnterpriseApplicationArchive)
    {
       super(name);
+      this.isEnterpriseApplicationArchive = isEnterpriseApplicationArchive;
    }
 
+   public boolean isEnterpriseApplicationArchive()
+   {
+      return isEnterpriseApplicationArchive;
+   }
+   
    @Override
    public void start() throws NamingException
    {
@@ -51,6 +59,7 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
    public void stop() throws NamingException
    {
       nameSpaces.getGlobalContext().unbind(name);
+      log.debug("Uninstalled context " + context + " for JavaEE application " + name);
       context = null;
    }
 
@@ -59,6 +68,7 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
    {
       return "MCJavaEEApplication{" +
          "name='" + name + '\'' +
+         ",isEnterpriseApplicationArchive='" + isEnterpriseApplicationArchive + '\'' +
          '}';
    }
 }
