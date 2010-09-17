@@ -28,13 +28,9 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.metadata.plugins.scope.ApplicationScope;
-import org.jboss.reloaded.naming.deployers.dependency.ParentsLookupStrategy;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEModuleInformer;
 import org.jboss.reloaded.naming.deployers.mc.MCJavaEEModule;
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
-
-import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
  * The ModuleNamingDeployer installs a JavaEEModule MC bean under the name of java:module
@@ -67,7 +63,7 @@ public class ModuleNamingDeployer extends AbstractRealDeployer
       
       // appName is either the name of the JavaEE application or null for a stand-alone JavaEE module
       String appName = informer.getApplicationName(unit);
-      String moduleName = informer.getModulePath(unit);
+      String moduleName = informer.getModuleName(unit);
 
       // create JavaEEModule bean
       String name = "jboss.naming:";

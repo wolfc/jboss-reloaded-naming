@@ -57,7 +57,7 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
          return;
 
       String appName = informer.getApplicationName(unit);
-      String moduleName = informer.getModulePath(unit);
+      String moduleName = informer.getModuleName(unit);
       String componentName = informer.getComponentName(unit);
 
       // create JavaEEModule bean

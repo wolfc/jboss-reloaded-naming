@@ -28,11 +28,8 @@ import org.jboss.beans.metadata.spi.builder.BeanMetaDataBuilder;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractSimpleRealDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.metadata.plugins.scope.ApplicationScope;
 import org.jboss.reloaded.naming.deployers.javaee.JavaEEComponentInformer;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
-
-import static org.jboss.reloaded.naming.deployers.util.AnnotationHelper.annotation;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
@@ -53,7 +50,7 @@ public class DummyDeployer extends AbstractSimpleRealDeployer<DummyMetaData>
    public void deploy(DeploymentUnit unit, DummyMetaData deployment) throws DeploymentException
    {
       String appName = informer.getApplicationName(unit);
-      String moduleName = informer.getModulePath(unit);
+      String moduleName = informer.getModuleName(unit);
       String componentName = informer.getComponentName(unit);
 
       // create dummy container bean

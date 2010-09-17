@@ -46,18 +46,15 @@ public interface JavaEEModuleInformer extends DeploymentUnitInformer
    String getApplicationName(DeploymentUnit deploymentUnit);
    
    /**
-    * Obtain the relative path of the deployment unit within the JavaEE application
+    * Obtain the Java EE module name of the deployment unit within the JavaEE application
     * or base deployment directory.
+    *
     * The deployment unit is either a JavaEE module or a component of the JavaEE module.
-    * If the JavaEE module is part of a JavaEE application return the relative
-    * path within the JavaEE application otherwise it is considered a stand alone deployment
-    * and return the relative path within the base deployment directory.
-    * Note that the relative path includes the module name, for example 'lib/bar.jar'.
-    * 
+    *
     * @param deploymentUnit the deployment unit of the module or a component
-    * @return the relative path of the JavaEE module
+    * @return the name of the JavaEE module
     */
-   String getModulePath(DeploymentUnit deploymentUnit);
+   String getModuleName(DeploymentUnit deploymentUnit);
    
    /**
     * Obtain the module type of the deployment unit.

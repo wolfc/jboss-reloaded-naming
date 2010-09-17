@@ -35,7 +35,7 @@ public class DummyJavaEEModuleInformer extends DummyJavaEEApplicationInformer im
       return super.getApplicationName(topLevel);
    }
 
-   public String getModulePath(DeploymentUnit deploymentUnit)
+   public String getModuleName(DeploymentUnit deploymentUnit)
    {
       String path = deploymentUnit.getRelativePath();
       if(path == null || path.length() == 0)
