@@ -42,9 +42,9 @@
          <version>2.2.0.Alpha2</version>
       </dependency>
       <dependency>
-         <groupId>org.jboss.reloaded</groupId>
-         <artifactId>jboss-reloaded-naming</artifactId>
-         <version>0.1.1-SNAPSHOT</version>
+         <groupId>org.jboss.reloaded.naming</groupId>
+         <artifactId>jboss-reloaded-naming-impl</artifactId>
+         <version>${project.version}</version>
       </dependency>
    </dependencies>
 </project>
