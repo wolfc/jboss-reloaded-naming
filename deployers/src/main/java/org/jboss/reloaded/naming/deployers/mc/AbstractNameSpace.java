@@ -21,7 +21,10 @@
  */
 package org.jboss.reloaded.naming.deployers.mc;
 
+import org.jboss.logging.Logger;
 import org.jboss.reloaded.naming.service.NameSpaces;
+import org.jnp.interfaces.NamingContext;
+import org.jnp.server.NamingServer;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -31,6 +34,8 @@ import javax.naming.NamingException;
  */
 public abstract class AbstractNameSpace
 {
+   private static final Logger log = Logger.getLogger(AbstractNameSpace.class);
+   
    protected final String name;
    protected NameSpaces nameSpaces;
    protected Context context;
@@ -39,10 +44,15 @@ public abstract class AbstractNameSpace
    {
       this.name = name;
    }
-   
+
    public Context getContext()
    {
       return context;
+   }
+
+   protected Context getGlobalContext()
+   {
+      return nameSpaces.getGlobalContext();
    }
 
    public String getName()
@@ -55,7 +65,14 @@ public abstract class AbstractNameSpace
       this.nameSpaces = nameSpaces;
    }
 
-   public abstract void start() throws Exception;
+   public void start() throws NamingException
+   {
+      NamingServer srv = new NamingServer();
+      context = new NamingContext(nameSpaces.getGlobalContext().getEnvironment(), null, srv);
+   }
 
-   public abstract void stop() throws Exception;
+   public void stop() throws NamingException
+   {
+      context = null;
+   }
 }

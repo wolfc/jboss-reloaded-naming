@@ -23,10 +23,13 @@ package org.jboss.reloaded.naming.deployers.test.common;
 
 import org.jboss.logging.Logger;
 import org.jboss.reloaded.naming.CurrentComponent;
+import org.jboss.reloaded.naming.spi.JavaEEApplication;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
+import org.jboss.reloaded.naming.spi.JavaEEModule;
 import org.jboss.util.naming.NonSerializableFactory;
 import org.jboss.util.naming.Util;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.util.concurrent.Callable;
 
@@ -88,16 +91,40 @@ public class DummyContainer
    public void start() throws Exception
    {
       ctx = new InitialContext();
+      Context globalContext = (Context) ctx.lookup("java:global");
 
+      // mimic MB 1.0 MB.2.1.2
       // normally done somewhere else
-      NonSerializableFactory.rebind(component.getModule().getContext(), component.getName(), this);
-      
+      JavaEEModule module = component.getModule();
+      // java:module/<bean-name>
+      NonSerializableFactory.rebind(module.getContext(), component.getName(), this);
+      String applicationName = module.getName() + "/" + component.getName();
+      JavaEEApplication application = component.getModule().getApplication();
+      // java:app/<module-name>/<bean-name>
+      NonSerializableFactory.rebind(application.getContext(), applicationName, this);
+      String globalName = (application.isEnterpriseApplicationArchive() ? application.getName() + "/" : "") + applicationName;
+      // bonus
+      // java:global[/<app-name>/<module-name>/<bean-name>
+      NonSerializableFactory.rebind(globalContext, globalName, this);
+
       log.info("Started container " + this + " with java:comp context " + component.getContext());
    }
 
    public void stop() throws Exception
    {
-      Util.unbind(component.getModule().getContext(), component.getName());
+      Context globalContext = (Context) ctx.lookup("java:global");
+
+      JavaEEModule module = component.getModule();
+      // java:module/<bean-name>
+      module.getContext().unbind(component.getName());
+      String applicationName = module.getName() + "/" + component.getName();
+      JavaEEApplication application = component.getModule().getApplication();
+      // java:app/<module-name>/<bean-name>
+      application.getContext().unbind(applicationName);
+      String globalName = (application.isEnterpriseApplicationArchive() ? application.getName() + "/" : "") + applicationName;
+      // bonus
+      // java:global[/<app-name>/<module-name>/<bean-name>
+      globalContext.unbind(globalName);
 
       if(ctx != null)
          ctx.close();

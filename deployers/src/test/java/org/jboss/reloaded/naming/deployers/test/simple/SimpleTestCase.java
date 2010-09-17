@@ -33,12 +33,12 @@ import org.jboss.reloaded.naming.deployers.test.common.AbstractNamingDeployersTe
 import org.jboss.reloaded.naming.deployers.test.common.DummiesMetaData;
 import org.jboss.reloaded.naming.deployers.test.common.DummyContainer;
 import org.jboss.reloaded.naming.service.NameSpaces;
-import org.jboss.util.naming.Util;
 import org.jboss.virtual.AssembledDirectory;
 import org.junit.Test;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -91,17 +91,19 @@ public class SimpleTestCase extends AbstractNamingDeployersTestCase
       {
          // basically the lookup is what really checks the functionality, not null is a bonus
          assertNotNull(ctx.lookup("java:global"));
-         Context c = (Context) ctx.lookup("java:global/components/components");
+         Context c = (Context) ctx.lookup("java:global/components");
          assertNotNull(c);
 
-         Util.bind(c, "test", "Hello world");
+         //Util.bind(c, "test", "Hello world");
 
-         DummyContainer containerA = (DummyContainer) ctx.lookup("java:global/components/components/A");
+         DummyContainer containerA = (DummyContainer) ctx.lookup("java:global/components/A");
 
+         DummyContainer containerB = (DummyContainer) ctx.lookup("java:global/components/B");
+
+         containerB.setValue("java:module/test", "Hello world");
+         
          String result = (String) containerA.getValue("java:module/test");
          assertEquals("Hello world", result);
-
-         DummyContainer containerB = (DummyContainer) ctx.lookup("java:global/components/components/B");
 
          containerA.setValue("java:comp/local", "a local value");
          try
@@ -111,7 +113,7 @@ public class SimpleTestCase extends AbstractNamingDeployersTestCase
          catch(RuntimeException e)
          {
             // good
-            // TODO: should be a NameNotFoundException
+            assertEquals(NameNotFoundException.class, e.getCause().getClass());
          }
       }
       finally

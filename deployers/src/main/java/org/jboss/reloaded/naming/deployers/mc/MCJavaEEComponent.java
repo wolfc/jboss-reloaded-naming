@@ -24,8 +24,8 @@ package org.jboss.reloaded.naming.deployers.mc;
 import org.jboss.logging.Logger;
 import org.jboss.reloaded.naming.spi.JavaEEComponent;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
-import org.jnp.interfaces.NamingContext;
-import org.jnp.server.NamingServer;
+
+import javax.naming.NamingException;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
@@ -48,18 +48,19 @@ public class MCJavaEEComponent extends AbstractNameSpace implements JavaEECompon
    }
 
    @Override
-   public void start() throws Exception
+   public void start() throws NamingException
    {
-      NamingServer srv = new NamingServer();
-      context = new NamingContext(nameSpaces.getGlobalContext().getEnvironment(), null, srv);
+      super.start();
 
       log.debug("Installed context " + context + " for JavaEE component " + name + " in module " + module.getName());
    }
 
    @Override
-   public void stop() throws Exception
+   public void stop() throws NamingException
    {
-      context = null;
+      super.stop();
+
+      log.debug("Uninstalled context " + context + " for JavaEE component " + name + " in module " + module.getName());
    }
 
    @Override

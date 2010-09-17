@@ -22,11 +22,11 @@
 package org.jboss.reloaded.naming.deployers.mc;
 
 import org.jboss.logging.Logger;
-import org.jboss.util.naming.Util;
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
 import org.jboss.reloaded.naming.spi.JavaEEModule;
+import org.jboss.util.naming.Util;
 
-import javax.naming.Context;
+import javax.naming.NamingException;
 
 /**
  * @author <a href="cdewolf@redhat.com">Carlo de Wolf</a>
@@ -36,7 +36,6 @@ public class MCJavaEEModule extends AbstractNameSpace implements JavaEEModule
    private static final Logger log = Logger.getLogger(MCJavaEEModule.class);
    
    private JavaEEApplication application;
-   private Context parentContext;
 
    public MCJavaEEModule(String name, JavaEEApplication application)
    {
@@ -49,22 +48,33 @@ public class MCJavaEEModule extends AbstractNameSpace implements JavaEEModule
       return application;
    }
 
-   @Override
-   public void start() throws Exception
+   protected String getGlobalName()
    {
-      parentContext = (application != null ? application.getContext() : nameSpaces.getGlobalContext());
-      context = Util.createSubcontext(parentContext, name);
-      // JavaEE 6 5.15
-      context.bind("ModuleName", name);
-      log.debug("Installed context " + context + " for JavaEE module " + name + ", application = " + application + ", parentContext = " + parentContext);
+      if(getApplication().isEnterpriseApplicationArchive())
+         return getApplication().getName() + "/" + name;
+      return name;
    }
 
    @Override
-   public void stop() throws Exception
+   public void start() throws NamingException
    {
-      Util.unbind(parentContext, name);
-      context = null;
-      parentContext = null;
+      super.start();
+      // bonus: java:global[/<app-name>]/<module-name> sub-context
+      Util.createSubcontext(getGlobalContext(), getGlobalName());
+      // bonus: java:app/<module-name> sub-context
+      Util.createSubcontext(getApplication().getContext(), name);
+      // JavaEE 6 5.15
+      context.bind("ModuleName", name);
+      log.debug("Installed context " + context + " for JavaEE module " + name + ", application = " + application);
+   }
+
+   @Override
+   public void stop() throws NamingException
+   {
+      super.stop();
+      getApplication().getContext().unbind(name);
+      getGlobalContext().unbind(getGlobalName());
+      log.debug("Uninstalled context " + context + " for JavaEE module " + name + ", application = " + application);
    }
 
    @Override

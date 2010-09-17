@@ -23,6 +23,7 @@ package org.jboss.reloaded.naming.deployers.mc;
 
 import org.jboss.logging.Logger;
 import org.jboss.reloaded.naming.spi.JavaEEApplication;
+import org.jboss.util.naming.Util;
 
 import javax.naming.NamingException;
 
@@ -49,7 +50,10 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
    @Override
    public void start() throws NamingException
    {
-      context = nameSpaces.getGlobalContext().createSubcontext(name);
+      super.start();
+      // bonus: if EAR then bind java:global/<app-name> sub-context
+      if(isEnterpriseApplicationArchive)
+         Util.createSubcontext(getGlobalContext(), name);
       // JavaEE 6 5.15
       context.bind("AppName", name);
       log.debug("Installed context " + context + " for JavaEE application " + name);
@@ -58,9 +62,10 @@ public class MCJavaEEApplication extends AbstractNameSpace implements JavaEEAppl
    @Override
    public void stop() throws NamingException
    {
-      nameSpaces.getGlobalContext().unbind(name);
+      super.stop();
+      if(isEnterpriseApplicationArchive)
+         getGlobalContext().unbind(name);
       log.debug("Uninstalled context " + context + " for JavaEE application " + name);
-      context = null;
    }
 
    @Override
