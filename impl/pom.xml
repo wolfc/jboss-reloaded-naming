@@ -36,5 +36,11 @@
       <artifactId>jnpserver</artifactId>
       <version>5.0.4.GA</version>
     </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>jboss-reloaded-naming-spi</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
