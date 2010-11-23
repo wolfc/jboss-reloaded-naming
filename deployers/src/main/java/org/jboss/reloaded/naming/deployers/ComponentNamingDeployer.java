@@ -60,24 +60,38 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
       String moduleName = informer.getModuleName(unit);
       String componentName = informer.getComponentName(unit);
 
-      // create JavaEEModule bean
+      // If the deployment is a web module, then java:comp == java:module
+      // (See JavaEE6 Spec, section EE.5.2.2). So we create a MCJavaEEComponent,
+      // which uses the same context as its parent JavaEEModule
+      boolean useJavaModuleContext = this.informer.belongsToWebModule(unit);
+      
+      // create JavaEEComponent bean
       String name = "jboss.naming:";
       if(appName != null)
          name += "application=" + appName + ",";
       name += "module=" + moduleName + ",component=" + componentName;
-      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEComponent.class.getName())
-//         .addAnnotation(annotation(DeploymentScope.class, moduleName))
+
+      BeanMetaDataBuilder builder = BeanMetaDataBuilderFactory.createBuilder(name, MCJavaEEComponent.class.getName());
+      
+      // add the JavaEEComponent name constructor param
+      builder.addConstructorParameter(String.class.getName(), componentName);
+
+      // add the JavaEEModule constructor param
+      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("jboss.naming:" + (appName != null ? "application=" + appName + "," : "") + "module=" + moduleName);
+      builder.addConstructorParameter(JavaEEModule.class.getName(), javaModule);
+      builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));      
+
+      // add the useJavaModuleContext constructor param
+      builder.addConstructorParameter(boolean.class.getName(), useJavaModuleContext);
+
+      //         .addAnnotation(annotation(DeploymentScope.class, moduleName))
 //         .addAnnotation(annotation(InstanceScope.class, componentName))
-         .addConstructorParameter(String.class.getName(), componentName)
+         
 //         .addAlias("java:comp")
-         ;
 //      if(appName != null)
 //         builder.addAnnotation(annotation(ApplicationScope.class, appName));
 //      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("java:module");
 //      javaModule.setSearch(new ParentsLookupStrategy());
-      AbstractInjectionValueMetaData javaModule = new AbstractInjectionValueMetaData("jboss.naming:" + (appName != null ? "application=" + appName + "," : "") + "module=" + moduleName);
-      builder.addConstructorParameter(JavaEEModule.class.getName(), javaModule);
-      builder.addPropertyMetaData("nameSpaces", builder.createInject("NameSpaces"));      
 
       // VDF can't do component composition, so each BMD must be in a separate component
       //DeploymentUnit component = unit.getParent().addComponent(componentName + ".java:comp");
@@ -95,4 +109,5 @@ public class ComponentNamingDeployer extends AbstractRealDeployer
       String name = informer.getComponentName(unit);
       unit.removeComponent(name + ".java:comp");
    }
+   
 }

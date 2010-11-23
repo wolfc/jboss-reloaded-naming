@@ -46,4 +46,11 @@ public class DummyJavaEEComponentInformer extends DummyJavaEEModuleInformer impl
    {
       return unit.isAttachmentPresent(DummyMetaData.class);
    }
+   
+   @Override
+   public boolean belongsToWebModule(DeploymentUnit deploymentUnit)
+   {
+      // Dummy
+      return false;
+   }
 }

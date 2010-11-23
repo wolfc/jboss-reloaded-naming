@@ -31,4 +31,13 @@ public interface JavaEEComponentInformer extends JavaEEModuleInformer
    String getComponentName(DeploymentUnit unit);
 
    boolean isJavaEEComponent(DeploymentUnit unit);
+   
+   /**
+    * Returns true if the passed {@link DeploymentUnit unit} belongs to a web module.
+    * Else returns false.
+    * 
+    * @param deploymentUnit
+    * @return
+    */
+   boolean belongsToWebModule(DeploymentUnit deploymentUnit);
 }
