@@ -2,7 +2,7 @@
    <parent>
       <groupId>org.jboss.reloaded.naming</groupId>
       <artifactId>jboss-reloaded-naming</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
+      <version>0.3.1</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
 
