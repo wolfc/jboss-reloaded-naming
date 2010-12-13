@@ -21,15 +21,14 @@
  */
 package org.jboss.reloaded.naming.service;
 
-import java.util.Hashtable;
+import org.jboss.naming.ENCFactory;
+import org.jboss.reloaded.naming.CurrentComponent;
+import org.jboss.reloaded.naming.spi.JavaEEComponent;
 
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
-
-import org.jboss.naming.ENCFactory;
-import org.jboss.reloaded.naming.CurrentComponent;
-import org.jboss.reloaded.naming.spi.JavaEEComponent;
+import java.util.Hashtable;
 
 /**
  * @author <a href="mailto:cdewolf@redhat.com">Carlo de Wolf</a>
@@ -45,7 +44,9 @@ public class ComponentObjectFactory implements ObjectFactory
       JavaEEComponent current = CurrentComponent.get();
       Object currentLegacyId = ENCFactory.getCurrentId();
       // if there is no current set or some legacy component has pushed another id
-      if(current == null || !currentLegacyId.equals(id(current)))
+      // currentLegacyId might be null in case child threads are calling into a java: namespace.
+      // This is not supported by spec (and by legacy), but is an extension.
+      if(current == null || (currentLegacyId != null && !currentLegacyId.equals(id(current))))
       {
          // do legacy resolution
          return legacy.getObjectInstance(obj, name, nameCtx, environment);

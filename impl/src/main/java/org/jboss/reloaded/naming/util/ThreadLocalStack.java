@@ -31,7 +31,14 @@ import java.util.LinkedList;
  */
 public class ThreadLocalStack<T>
 {
-   private ThreadLocal<LinkedList<T>> stack = new ThreadLocal<LinkedList<T>>();
+   private ThreadLocal<LinkedList<T>> stack = new InheritableThreadLocal<LinkedList<T>>() {
+      @Override
+      protected LinkedList<T> childValue(LinkedList<T> parentValue)
+      {
+         // do a shallow clone
+         return (LinkedList<T>) parentValue.clone();
+      }
+   };
 
    public void push(T obj)
    {
