@@ -35,6 +35,8 @@ public class ThreadLocalStack<T>
       @Override
       protected LinkedList<T> childValue(LinkedList<T> parentValue)
       {
+         if(parentValue == null)
+            return null;
          // do a shallow clone
          return (LinkedList<T>) parentValue.clone();
       }
